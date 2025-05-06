@@ -1,0 +1,107 @@
+# --------------------
+# Python
+# --------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+.eggs/
+*.log
+*.tmp
+*.out
+*.bak
+*.swp
+*.ipynb_checkpoints
+
+# --------------------
+# Jupyter
+# --------------------
+.ipynb_checkpoints
+notebooks/*.ipynb
+*.ipynb
+
+# --------------------
+# Environment
+# --------------------
+.env
+.env.*
+.envrc
+.venv/
+venv/
+pip-wheel-metadata/
+poetry.lock
+Pipfile.lock
+
+# --------------------
+# VSCode / IDEs
+# --------------------
+.vscode/
+.idea/
+*.code-workspace
+
+# --------------------
+# dbt
+# --------------------
+dbt_modules/
+dbt_packages/
+target/
+dbt.log
+logs/
+manifest.json
+run_results.json
+*.dbt
+
+# --------------------
+# Airflow
+# --------------------
+airflow.db
+airflow.cfg
+unittests.cfg
+logs/
+__pycache__/
+*.pid
+*.err
+*.log
+
+# --------------------
+# Metabase
+# --------------------
+metabase.db
+metabase-data/
+.metabase/
+
+# --------------------
+# Docker
+# --------------------
+*.dockerfile
+docker-compose.override.yml
+docker-compose.*.yml
+.docker/
+.dockerignore
+
+# --------------------
+# Data
+# --------------------
+*.csv
+*.parquet
+*.json
+*.xlsx
+data/raw/
+data/interim/
+data/processed/
+*.sqlite
+*.db
+*.h5
+*.hdf5
+
+# --------------------
+# OS/System
+# --------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
