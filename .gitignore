@@ -105,3 +105,8 @@ Thumbs.db
 ehthumbs.db
 Icon?
 Desktop.ini
+
+# UV
+# (If UV creates a local cache directory—e.g. “.uvcache/” or “.uv/”—ignore that too)
+.uvcache/
+.uv/
