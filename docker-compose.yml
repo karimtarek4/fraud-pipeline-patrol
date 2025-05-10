@@ -26,7 +26,9 @@ services:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
+      - ./scripts:/opt/airflow/scripts
       - ./data/raw:/opt/airflow/data/raw
+      - ./data/processed:/opt/airflow/data/processed
       # Mount our custom init script
       - ./airflow/scripts/entrypoint.sh:/entrypoint.sh:ro
     # Run that script as the container’s entrypoint
