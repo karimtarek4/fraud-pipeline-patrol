@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   minio:
     image: minio/minio:latest
@@ -11,3 +10,24 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - ./minio/data:/data
+
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airflow
+    depends_on:
+      - minio
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+      - ./data/raw:/opt/airflow/data/raw
+      # Mount our custom init script
+      - ./airflow/scripts/entrypoint.sh:/entrypoint.sh:ro
+    # Run that script as the container’s entrypoint
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
