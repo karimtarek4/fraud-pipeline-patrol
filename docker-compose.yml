@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - .env
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./minio/data:/data

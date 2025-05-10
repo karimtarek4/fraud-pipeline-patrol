@@ -110,3 +110,8 @@ Desktop.ini
 # (If UV creates a local cache directory—e.g. “.uvcache/” or “.uv/”—ignore that too)
 .uvcache/
 .uv/
+
+# --------------------
+# Minio
+# --------------------
+minio/data/
