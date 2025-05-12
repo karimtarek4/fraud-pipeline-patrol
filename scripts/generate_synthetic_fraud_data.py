@@ -95,6 +95,7 @@ def generate_transactions(customers, merchants, avg_txs_per_cust=5.0):
     """
     Build a transactions table with rich features:
       - Poisson-drawn counts, exponential inter-arrival (bursts)
+      - Timestamps spread throughout the entire year (2022)
       - Amounts around customer baseline (normal distribution)
       - Device/IP consistency vs. random hops
       - Geolocation jitter vs. large drift
@@ -103,22 +104,36 @@ def generate_transactions(customers, merchants, avg_txs_per_cust=5.0):
     records = []
     tx_id = 1
     ingestion_date = return_current_ingestion_date()
-    # -: is index 
+    
+    # Create yearly timestamp range
+    year_start = pd.Timestamp("2022-01-01")
+    year_end = pd.Timestamp("2022-12-31")
+    year_range_seconds = (year_end - year_start).total_seconds()
+    
     for _, cust in customers.iterrows():
         # poisson: You might get 3, 7, 1, or even 0 by chance so it averages 5.
         # max: ensures you never drop to zero.
-        count   = max(1, np.random.poisson(lam=avg_txs_per_cust))
-        ts_list = random_timestamps(pd.Timestamp("2022-01-01"), count)
-
-        # build customer transactions, use ts as base.
-        for ts in ts_list:
+        count = max(1, np.random.poisson(lam=avg_txs_per_cust))
+        
+        # Generate random start points throughout the year
+        random_starts = []
+        for _ in range(count):
+            # Pick a random point in the year
+            random_seconds = np.random.uniform(0, year_range_seconds)
+            random_start = year_start + pd.Timedelta(seconds=random_seconds)
+            random_starts.append(random_start)
+        
+        # Sort the timestamps to maintain chronological order per customer
+        random_starts.sort()
+        
+        # build customer transactions, using random timestamps throughout the year
+        for ts in random_starts:
             # loc: mean position
-            # scale: standard deviation from meamn
+            # scale: standard deviation from mean
             amt = np.random.normal(loc=cust["AvgTransactionAmount"],
-                                   scale=0.3 * cust["AvgTransactionAmount"])
+                                  scale=0.3 * cust["AvgTransactionAmount"])
             amt = abs(amt) if amt > 1 else 1.0
             
-            # NOTE: transaction data not necessarly aligns with customer data, enforcing suspision 
             # Device & IP hops
             device = cust["HomeDevice"] if np.random.rand() < 0.9 \
                      else f"dev_{np.random.randint(1000,9999)}"
