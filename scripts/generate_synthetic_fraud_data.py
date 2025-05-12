@@ -14,6 +14,7 @@ import uuid
 from datetime import datetime
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 def ensure_dirs(dirs):
     """Create each directory in `dirs` if it doesn't already exist."""
@@ -41,6 +42,9 @@ def generate_customers(start_id=1001, num_customers=1000):
         "AccountCreationDate": pd.date_range("2020-01-01", periods=num_customers, freq="D"),
         "Age": np.random.randint(18, 65, num_customers),
     })
+
+    # Add AccountCreationMonth field
+    df["AccountCreationMonth"] = df["AccountCreationDate"].dt.month
 
     # Behavioral baselines
     # choice: conitnous
@@ -162,6 +166,7 @@ def generate_transactions(customers, merchants, avg_txs_per_cust=5.0):
                 "TransactionID":     tx_id,
                 "CustomerID":        cust["CustomerID"],
                 "Timestamp":         ts,
+                "TimestampMonth":    ts.month,
                 "TransactionAmount": float(amt),
                 "DeviceID":          device,
                 "IP_Address":        ip,
@@ -192,16 +197,19 @@ def generate_login_attempts(transactions):
             delta = np.random.exponential(scale=60)
             lt    = tx["Timestamp"] - pd.Timedelta(seconds=delta)
             logs.append({
-                "CustomerID":     tx["CustomerID"],
-                "LoginTimestamp": lt,
-                "Success":        False,
-                "ingestion_date": ingestion_date
+                "CustomerID":         tx["CustomerID"],
+                "LoginTimestamp":     lt,
+                "LoginTimestampMonth": lt.month,
+                "Success":            False,
+                "ingestion_date":     ingestion_date
             })
 
     return pd.DataFrame(logs)
 
 def main():
-    raw_dir = "data/raw"
+    cwd = Path.cwd().parent
+    raw_dir = cwd / 'data' / 'raw'
+    print(f"Writing data to {raw_dir}")
     ensure_dirs([raw_dir])
 
     customers    = generate_customers()
