@@ -207,7 +207,7 @@ def generate_login_attempts(transactions):
     return pd.DataFrame(logs)
 
 def main():
-    cwd = Path.cwd().parent
+    cwd = Path(__file__).resolve().parent.parent
     raw_dir = cwd / 'data' / 'raw'
     print(f"Writing data to {raw_dir}")
     ensure_dirs([raw_dir])
