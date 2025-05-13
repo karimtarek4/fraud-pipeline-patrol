@@ -24,9 +24,9 @@ default_args = {
 }
 
 with DAG(
-    'data_generation',
+    'generate_and_partition_data_dag',
     default_args=default_args,
-    description='Generate transaction data every 1 minutes',
+    description='Generate fake transaction data every 1 minutes',
     schedule_interval='*/1 * * * *',  # Run every 1 minutes
     catchup=False,
     max_active_runs=1, # add max active runs to avoid overlapping
