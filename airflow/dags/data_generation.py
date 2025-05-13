@@ -9,6 +9,7 @@ from minio import Minio
 from minio.error import S3Error
 import pandas as pd
 import logging
+import duckdb
 
 # Sets the minimum logging level to INFO.
 logging.basicConfig(level=logging.INFO)
@@ -22,9 +23,6 @@ default_args = {
     'retry_delay': timedelta(minutes=2)
 }
 
-BUCKET_NAME = "fraud-data"
-RAW_PREFIX = "raw"
-
 with DAG(
     'data_generation',
     default_args=default_args,
@@ -34,11 +32,18 @@ with DAG(
     max_active_runs=1, # add max active runs to avoid overlapping
 ) as dag:
     
-    # Task 1: Generate data
+    # Task 1: Generate data "Overwrite"
     generate_data_task = BashOperator(
         task_id='generate_data',
         bash_command='cd /opt/airflow && python /opt/airflow/scripts/generate_synthetic_fraud_data.py',
         dag=dag,
     )
 
-    generate_data_task
+    # Task : Partition data with DuckDB
+    partition_data_task = BashOperator(
+        task_id='partition_data',
+        bash_command='cd /opt/airflow && python /opt/airflow/scripts/partition_data_with_duckdb.py',
+        dag=dag,
+    )
+    # Set task dependencies
+    generate_data_task >> partition_data_task
