@@ -19,9 +19,7 @@ __pycache__/
 # --------------------
 # Jupyter
 # --------------------
-.ipynb_checkpoints
-notebooks/*.ipynb
-*.ipynb
+
 
 # --------------------
 # Environment
