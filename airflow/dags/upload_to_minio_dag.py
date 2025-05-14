@@ -13,6 +13,7 @@ from minio import Minio
 from minio.error import S3Error
 import pandas as pd
 import logging
+from airflow.sensors.external_task import ExternalTaskSensor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -34,11 +35,12 @@ with DAG(
     dag_id='upload_to_minio_dag',
     default_args=default_args,
     description='Load partitioned data to MinIO',
-    schedule_interval=timedelta(days=1),
+    schedule_interval='*/3 * * * *',  # Run every 3 minutes
     catchup=False,
+    is_paused_upon_creation=False
 ) as dag:
 
-    # Task 2: Upload data to MinIO
+
     def upload_to_minio():
         try:
             # Get paths 
@@ -128,7 +130,18 @@ with DAG(
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             raise
-    
+
+    # Add a sensor to wait for the generate_and_partition_data_dag to complete
+    wait_for_generate_dag = ExternalTaskSensor(
+        task_id='wait_for_generate_dag',
+        external_dag_id='generate_and_partition_data_dag',
+        external_task_id=None,  # Wait for the entire DAG to complete
+        allowed_states=['success'], # Only proceed if the external DAG is successful
+        execution_delta=timedelta(minutes=0),  # delta between the two DAGs (good if they are scheduled to run at the same time)
+        timeout=600,  # Increase timeout to 10 minutes to allow data generation to complete
+        mode='reschedule',  # Free up worker while waiting
+        poke_interval=30,  # Check every 30 seconds
+    )
     # Create the upload task
     upload_partitioned_data_to_minio_task = PythonOperator(
         task_id='upload_partitioned_data_to_minio',
@@ -137,4 +150,4 @@ with DAG(
     )
     
     # Define task dependencies
-    upload_partitioned_data_to_minio_task 
+    wait_for_generate_dag >> upload_partitioned_data_to_minio_task 

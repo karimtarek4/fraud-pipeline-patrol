@@ -10,6 +10,7 @@ from minio.error import S3Error
 import pandas as pd
 import logging
 import duckdb
+from airflow.sensors.external_task import ExternalTaskSensor
 
 # Sets the minimum logging level to INFO.
 logging.basicConfig(level=logging.INFO)
@@ -30,6 +31,7 @@ with DAG(
     schedule_interval='*/1 * * * *',  # Run every 1 minutes
     catchup=False,
     max_active_runs=1, # add max active runs to avoid overlapping
+    is_paused_upon_creation=False
 ) as dag:
     
     # Task 1: Generate data "Overwrite"
@@ -39,7 +41,7 @@ with DAG(
         dag=dag,
     )
 
-    # Task : Partition data with DuckDB
+    # Task 2: Partition data with DuckDB
     partition_data_task = BashOperator(
         task_id='partition_data',
         bash_command='cd /opt/airflow && python /opt/airflow/scripts/partition_data_with_duckdb.py',
