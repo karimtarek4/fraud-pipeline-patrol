@@ -1,10 +1,11 @@
 version: 2
 
 sources:
-  - name: fraud_detection
-    schema: 'customers'  # No schema for direct S3 access
+  - name: fraud_data
     meta:
-        external_location: "read_parquet('s3://fraud-data-processed/customers/**/*.parquet')"
+        external_location: "read_parquet('s3://fraud-data-processed/{name}/**/*.parquet')"
     tables:
       - name: customers
-        description: "Customer data from MinIO"
+      - name: transactions
+      - name: merchants
+      - name: login_attempts
