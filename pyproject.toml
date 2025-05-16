@@ -5,6 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "dbt-core>=1.9.4",
+    "dbt-coverage>=0.3.9",
+    "dbt-duckdb>=1.9.3",
+    "dbterd",
     "duckdb>=1.2.2",
     "fastparquet>=2024.11.0",
     "numpy>=2.2.5",
@@ -12,3 +16,6 @@ dependencies = [
     "pyarrow>=20.0.0",
     "requests>=2.32.3",
 ]
+
+[tool.uv.sources]
+dbterd = { git = "https://github.com/intellishore/dbt-erdiagram-generator", subdirectory = "src" }
