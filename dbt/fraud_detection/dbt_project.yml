@@ -36,3 +36,7 @@ models:
       +materialized: table
       +enabled: true
       +schema: dwh
+    dwh_staging:
+      +materialized: table
+      +enabled: true
+      +schema: dwh_staging
