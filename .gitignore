@@ -113,3 +113,7 @@ Desktop.ini
 # Minio
 # --------------------
 minio/data/
+
+
+# Duckdb
+dbt/fraud_detection/*.duckdb
