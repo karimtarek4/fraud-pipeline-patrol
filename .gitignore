@@ -117,3 +117,4 @@ minio/data/
 
 # Duckdb
 dbt/fraud_detection/*.duckdb
+*.duckdb
