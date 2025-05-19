@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: raw_customer
+    description: "Raw customer data from fraud detection system"
+    meta:
+      owner: "Data Team"
+    columns:
+      - name: CustomerID
+        description: "Unique identifier for each customer"
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: bigint
+      
+      - name: AccountCreationDate
+        description: "Date when the customer account was created"
+        tests:
+          - not_null
+
+              
+      - name: Age
+        description: "Customer age in years"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 18
+              max_value: 100
+              strictly: false
+              
+      - name: AvgTransactionAmount
+        description: "Average transaction amount for this customer"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              strictly: true
+          - dbt_expectations.expect_column_mean_to_be_between:
+              min_value: 50
+              max_value: 200
+              
+      - name: PastFraudCount
+        description: "Number of past fraudulent activities associated with this customer"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              strictly: false
+              
+      - name: HomeDevice
+        description: "Primary device type used by the customer"
+        tests:
+          - not_null
+              
+      - name: HomeIP
+        description: "Primary IP address used by the customer"
+        tests:
+          - not_null
+          
+      - name: HomeLat
+        description: "Latitude of customer's primary location"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -90
+              max_value: 90
+      
+      - name: HomeLon
+        description: "Longitude of customer's primary location"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -180
+              max_value: 180
+      
+      - name: AccountCreationMonth
+        description: "Month when the account was created (derived from AccountCreationDate)"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 12
