@@ -2,6 +2,12 @@ version = 1
 revision = 2
 requires-python = ">=3.13"
 
+[manifest]
+members = [
+    "fraud-detection",
+    "fraud-pipeline-patrol",
+]
+
 [[package]]
 name = "agate"
 version = "1.9.1"
@@ -330,6 +336,17 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/13/3d/c076beeb926c79593374c04662a9422a76650eef17cd1c8e10951340764a/fastparquet-2024.11.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:8b35823ac7a194134e5f82fa4a9659e42e8f9ad1f2d22a55fbb7b9e4053aabbb", size = 1851322, upload-time = "2024-11-12T20:38:16.231Z" },
     { url = "https://files.pythonhosted.org/packages/09/5a/1d0d47e64816002824d4a876644e8c65540fa23f91b701f0daa726931545/fastparquet-2024.11.0-cp313-cp313-win_amd64.whl", hash = "sha256:d20632964e65530374ff7cddd42cc06aa0a1388934903693d6d22592a5ba827b", size = 673266, upload-time = "2024-11-12T20:38:17.661Z" },
 ]
+
+[[package]]
+name = "fraud-detection"
+version = "0.1.0"
+source = { virtual = "dbt/fraud_detection" }
+dependencies = [
+    { name = "dbt-coverage" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "dbt-coverage", specifier = ">=0.3.9" }]
 
 [[package]]
 name = "fraud-pipeline-patrol"

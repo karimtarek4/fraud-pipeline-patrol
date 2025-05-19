@@ -19,3 +19,8 @@ dependencies = [
 
 [tool.uv.sources]
 dbterd = { git = "https://github.com/intellishore/dbt-erdiagram-generator", subdirectory = "src" }
+
+[tool.uv.workspace]
+members = [
+    "dbt/fraud_detection",
+]
