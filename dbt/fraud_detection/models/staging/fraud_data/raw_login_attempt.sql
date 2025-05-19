@@ -1,5 +1,10 @@
 WITH base AS (
-    SELECT *
+    SELECT 
+        CustomerID,
+        LoginTimestamp,
+        Success,
+        ingestion_date,
+        LoginTimestampMonth
     FROM {{ source('fraud_data', 'login_attempts') }}
 )
 

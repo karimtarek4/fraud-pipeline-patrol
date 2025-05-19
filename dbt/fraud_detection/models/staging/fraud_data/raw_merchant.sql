@@ -1,5 +1,10 @@
 WITH base AS (
-    SELECT *
+    SELECT
+        MerchantID,
+        MerchantName,
+        Category,
+        MerchantRiskScore,
+        ingestion_date
     FROM {{ source('fraud_data', 'merchants') }}
 )
 

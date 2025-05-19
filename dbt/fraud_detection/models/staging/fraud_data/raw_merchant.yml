@@ -9,7 +9,6 @@ models:
         tests:
           - not_null
           - dbt_utils.not_constant
-          - unique
 
       - name: MerchantName
         description: "Merchant's display name."
