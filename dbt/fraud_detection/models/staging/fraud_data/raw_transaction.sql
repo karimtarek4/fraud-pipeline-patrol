@@ -9,11 +9,7 @@ WITH base AS (
         Lat,
         Lon,
         Channel,
-        PastFraudCount,
         MerchantID,
-        MerchantName,
-        MerchantCategory,
-        MerchantRiskScore,
         ingestion_date,
         TimestampMonth
     FROM {{ source('fraud_data', 'transactions') }}
