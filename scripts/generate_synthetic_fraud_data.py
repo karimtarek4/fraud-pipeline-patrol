@@ -173,11 +173,7 @@ def generate_transactions(customers, merchants, avg_txs_per_cust=5.0):
                 "Lat":               lat,
                 "Lon":               lon,
                 "Channel":           channel,
-                "PastFraudCount":    int(cust["PastFraudCount"]),
                 "MerchantID":        int(merch["MerchantID"]),
-                "MerchantName":      merch["MerchantName"],
-                "MerchantCategory":  merch["Category"],
-                "MerchantRiskScore": float(merch["MerchantRiskScore"]),
                 "FailedTransactions":      int(fails),
                 "ingestion_date":    ingestion_date
             })
