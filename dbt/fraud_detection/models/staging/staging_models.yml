@@ -1,0 +1,128 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "Cleaned, standardized customer data with derived risk metrics"
+    columns:
+      - name: customer_id
+        description: "Unique identifier for each customer"
+      - name: account_creation_date
+        description: "Standardized timestamp when the customer account was created"
+      - name: age
+        description: "Customer age, validated to be between 0-120"
+      - name: avg_transaction_amount
+        description: "Average transaction amount for the customer"
+      - name: past_fraud_count
+        description: "Number of past frauds associated with this customer"
+      - name: home_device
+        description: "Primary device identifier used by the customer"
+      - name: home_ip
+        description: "Primary IP address used by the customer, validated format"
+      - name: home_latitude
+        description: "Home location latitude, validated to be between -90 and 90"
+      - name: home_longitude
+        description: "Home location longitude, validated to be between -180 and 180"
+      - name: ingestion_date
+        description: "Standardized timestamp when record was ingested"
+      - name: account_creation_month
+        description: "Month component of account creation date"
+      - name: account_creation_year
+        description: "Year component of account creation date"
+      - name: processed_at
+        description: "Timestamp when this record was processed"
+      - name: risk_level
+        description: "Derived risk categorization for the customer (High, Medium, Low)"
+
+  - name: stg_merchants
+    description: "Cleaned, standardized merchant data with derived risk metrics"
+    columns:
+      - name: merchant_id
+        description: "Business identifier for merchant"
+      - name: merchant_name
+        description: "Standardized merchant name, with default for missing values"
+      - name: category
+        description: "Standardized merchant category, with default for missing values"
+      - name: merchant_risk_score
+        description: "Risk score for merchant, validated to be between 0 and 1"
+      - name: ingestion_date
+        description: "Standardized timestamp when record was ingested"
+      - name: processed_at
+        description: "Timestamp when this record was processed"
+      - name: risk_category
+        description: "Derived risk categorization (High Risk, Medium Risk, Low Risk)"
+
+  - name: stg_login_attempts
+    description: "Cleaned, standardized login attempt data with time analysis features"
+    columns:
+      - name: customer_id
+        description: "Customer identifier"
+      - name: login_timestamp
+        description: "Standardized timestamp of the login attempt"
+      - name: is_success
+        description: "Boolean indicating if the login attempt was successful"
+      - name: ingestion_date
+        description: "Standardized timestamp when record was ingested"
+      - name: login_month
+        description: "Month component of login timestamp"
+      - name: login_year
+        description: "Year component of login timestamp"
+      - name: login_day_of_week
+        description: "Day of week of login (0=Sunday, 6=Saturday)"
+      - name: login_hour
+        description: "Hour of day of login (0-23)"
+      - name: processed_at
+        description: "Timestamp when this record was processed"
+      - name: login_time_of_day
+        description: "Categorized time of day (Morning, Afternoon, Evening, Night)"
+      - name: is_weekend_login
+        description: "Boolean indicating if login occurred on a weekend"
+
+  - name: stg_transactions
+    description: "Cleaned, standardized transaction data with derived fraud risk indicators"
+    columns:
+      - name: transaction_id
+        description: "Unique identifier for each transaction"
+      - name: customer_id
+        description: "Customer identifier linked to the transaction"
+      - name: merchant_id
+        description: "Merchant identifier linked to the transaction"
+      - name: transaction_timestamp
+        description: "Standardized timestamp when transaction occurred"
+      - name: transaction_amount
+        description: "Transaction amount, validated to be non-negative"
+      - name: device_id
+        description: "Device identifier used for the transaction"
+      - name: ip_address
+        description: "IP address used for the transaction"
+      - name: channel
+        description: "Transaction channel (web, mobile, etc.)"
+      - name: merchant_name
+        description: "Standardized merchant name"
+      - name: merchant_category
+        description: "Standardized merchant category"
+      - name: latitude
+        description: "Transaction location latitude, validated"
+      - name: longitude
+        description: "Transaction location longitude, validated"
+      - name: past_fraud_count
+        description: "Number of past frauds for this customer at time of transaction"
+      - name: merchant_risk_score
+        description: "Risk score for merchant, validated"
+      - name: ingestion_date
+        description: "Standardized timestamp when record was ingested"
+      - name: transaction_month
+        description: "Month component of transaction timestamp"
+      - name: transaction_year
+        description: "Year component of transaction timestamp"
+      - name: transaction_day_of_week
+        description: "Day of week of transaction (0=Sunday, 6=Saturday)"
+      - name: transaction_hour
+        description: "Hour of day of transaction (0-23)"
+      - name: processed_at
+        description: "Timestamp when this record was processed"
+      - name: transaction_time_of_day
+        description: "Categorized time of day (Morning, Afternoon, Evening, Night)"
+      - name: is_weekend_transaction
+        description: "Boolean indicating if transaction occurred on a weekend"
+      - name: transaction_risk_level
+        description: "Overall transaction risk assessment (Very High, High, Medium, Low)"

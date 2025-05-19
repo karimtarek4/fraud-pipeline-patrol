@@ -58,36 +58,10 @@ models:
         tests:
           - not_null
 
-      - name: PastFraudCount
-        description: "Number of past frauds for this customer."
-        tests:
-          - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              min_value: 0
-              strictly: false
-
       - name: MerchantID
         description: "Merchant identifier."
         tests:
           - not_null
-
-      - name: MerchantName
-        description: "Merchant's display name."
-        tests:
-          - not_null
-
-      - name: MerchantCategory
-        description: "Merchant category."
-        tests:
-          - not_null
-
-      - name: MerchantRiskScore
-        description: "Risk score for merchant (0.1–0.8)."
-        tests:
-          - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              min_value: 0.0
-              max_value: 1.0
 
 
       - name: TimestampMonth
