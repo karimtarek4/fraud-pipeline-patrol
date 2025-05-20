@@ -3,8 +3,7 @@ WITH base AS (
         CustomerID,
         LoginTimestamp,
         Success,
-        ingestion_date,
-        LoginTimestampMonth
+        ingestion_date
     FROM {{ source('fraud_data', 'login_attempts') }}
 )
 
