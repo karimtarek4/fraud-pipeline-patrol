@@ -25,32 +25,18 @@ cleaned AS (
         Lon AS longitude,
         
         -- System fields
-        ingestion_date,
+        ingestion_date
         
-        -- Date components for analysis
-        TimestampMonth AS transaction_month,
-        EXTRACT(YEAR FROM Timestamp) AS transaction_year,
-        EXTRACT(DOW FROM Timestamp) AS transaction_day_of_week,
-        EXTRACT(HOUR FROM Timestamp) AS transaction_hour
+
         
     FROM source
 ),
 
 final AS (
     SELECT
-        *,
-        -- Transaction pattern analysis
-        CASE
-            WHEN transaction_hour >= 0 AND transaction_hour < 6 THEN 'Night (12AM-6AM)'
-            WHEN transaction_hour >= 6 AND transaction_hour < 12 THEN 'Morning (6AM-12PM)'
-            WHEN transaction_hour >= 12 AND transaction_hour < 18 THEN 'Afternoon (12PM-6PM)'
-            ELSE 'Evening (6PM-12AM)'
-        END AS transaction_time_of_day,
-        
-        
-        -- Additional fraud indicators
-        (transaction_amount > 1000) AS is_high_value_transaction
-    FROM cleaned
+        *
+    FROM 
+        cleaned
 )
 
 -- Final output with cleaned data and fraud detection indicators
@@ -65,13 +51,7 @@ SELECT
     channel,
     latitude,
     longitude,
-    ingestion_date,
-    transaction_month,
-    transaction_year,
-    transaction_day_of_week,
-    transaction_hour,
-    transaction_time_of_day,
-    is_high_value_transaction
+    ingestion_date
 
 FROM 
     final
