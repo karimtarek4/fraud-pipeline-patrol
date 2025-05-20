@@ -1,7 +1,7 @@
 {{
   config(
     materialized='table',
-    tags=['marts', 'dim', 'core']
+    tags=['dim', 'core']
   )
 }}
 
