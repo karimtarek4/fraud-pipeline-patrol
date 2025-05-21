@@ -15,16 +15,15 @@ WITH stg_customer AS (
 ),
 
 -- Add any additional customer attributes or aggregated metrics
-infer_columns AS (
+derived_columns AS (
     SELECT
         stg_customer.*,
         -- flags
         (past_fraud_count > 0) AS has_fraud_history,
         -- dates
-        DATE_DIFF('day', account_creation_date, CURRENT_DATE()) AS account_age_days,
-         EXTRACT(Month FROM account_creation_date) AS account_creation_month,
+        EXTRACT(Month FROM account_creation_date) AS account_creation_month,
         EXTRACT(YEAR FROM account_creation_date) AS account_creation_year,
-        DATE_DIFF('day', account_creation_date, CURRENT_DATE()) AS account_age_days,
+        EXTRACT(DAY FROM age(account_creation_date)) AS account_age_days,
         -- Derived categorical grouping 
         CASE
             WHEN age < 25 THEN 'Under 25'
@@ -40,7 +39,7 @@ infer_columns AS (
             WHEN past_fraud_count > 5 THEN 'High'
             WHEN past_fraud_count > 2 THEN 'Medium'
             ELSE 'Low'
-        END AS risk_level,
+        END AS risk_level
     FROM stg_customer
 )
 
@@ -48,7 +47,6 @@ SELECT
     customer_id,
     account_creation_date,
     age,
-    avg_transaction_amount,
     past_fraud_count,
     home_device,
     home_ip, 
@@ -65,4 +63,4 @@ SELECT
     -- Derived risk classification based on fraud history
     risk_level
 FROM 
-    infer_columns
+    derived_columns

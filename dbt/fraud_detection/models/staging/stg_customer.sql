@@ -13,8 +13,7 @@ cleaned AS (
         -- Demographic information
         Age AS age,
         
-        -- Financial metrics
-        AvgTransactionAmount AS avg_transaction_amount,
+        -- Metrics
         COALESCE(PastFraudCount, 0) AS past_fraud_count,
         
         -- Device and location info
@@ -34,7 +33,6 @@ SELECT
     customer_id,
     account_creation_date,
     age,
-    avg_transaction_amount,
     past_fraud_count,
     home_device,
     home_ip, 

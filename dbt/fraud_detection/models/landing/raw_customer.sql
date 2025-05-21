@@ -1,17 +1,18 @@
 WITH base AS (
-    SELECT 
-        CustomerID,
+        SELECT 
+            CustomerID,
             AccountCreationDate,
             Age,
-            AvgTransactionAmount,
+            -- @ To be calculated as metric in fact_transaction
+            -- AvgTransactionAmount,
             PastFraudCount,
             HomeDevice,
             HomeIP,
             HomeLat,
             HomeLon,
-            ingestion_date,
-            AccountCreationMonth
-    FROM {{ source('fraud_data', 'customers') }}
+            current_localtimestamp() AS ingestion_date
+        FROM 
+            {{ source('fraud_data', 'customers') }}
 )
 
 SELECT * FROM base
