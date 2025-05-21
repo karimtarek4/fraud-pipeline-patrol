@@ -4,7 +4,7 @@ WITH base AS (
         MerchantName,
         Category,
         MerchantRiskScore,
-        ingestion_date
+        local_timestamp() ingestion_date
     FROM {{ source('fraud_data', 'merchants') }}
 )
 
