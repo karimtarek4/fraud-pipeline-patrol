@@ -21,19 +21,19 @@ dim_customers AS (
 add_columns AS (
     SELECT
         stg_login_attempt.*,
-        EXTRACT(MONTH FROM login_timestamp) AS login_month,
-        EXTRACT(YEAR FROM login_timestamp) AS login_year,
-        EXTRACT(DOW FROM login_timestamp) AS login_day_of_week,
-        EXTRACT(HOUR FROM login_timestamp) AS login_hour,
+        date_part('month', login_timestamp) AS login_month,
+        date_part('year', login_timestamp) AS login_year,
+        date_part('dow', login_timestamp) AS login_day_of_week,
+        date_part('hour', login_timestamp) AS login_hour,
         CASE
-            WHEN login_hour >= 0 AND login_hour < 6 THEN 'Night (12AM-6AM)'
-            WHEN login_hour >= 6 AND login_hour < 12 THEN 'Morning (6AM-12PM)'
-            WHEN login_hour >= 12 AND login_hour < 18 THEN 'Afternoon (12PM-6PM)'
+            WHEN date_part('hour', login_timestamp) >= 0 AND date_part('hour', login_timestamp) < 6 THEN 'Night (12AM-6AM)'
+            WHEN date_part('hour', login_timestamp) >= 6 AND date_part('hour', login_timestamp) < 12 THEN 'Morning (6AM-12PM)'
+            WHEN date_part('hour', login_timestamp) >= 12 AND date_part('hour', login_timestamp) < 18 THEN 'Afternoon (12PM-6PM)'
             ELSE 'Evening (6PM-12AM)'
         END AS login_time_of_day,
         
         CASE
-            WHEN login_day_of_week IN (0, 6) THEN TRUE  -- 0=Sunday, 6=Saturday
+            WHEN date_part('dow', login_timestamp) IN (0, 6) THEN TRUE  -- 0=Sunday, 6=Saturday
             ELSE FALSE
         END AS is_weekend_login
     FROM stg_login_attempt
