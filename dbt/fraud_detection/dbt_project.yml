@@ -56,3 +56,7 @@ models:
         +materialized: view
         +schema: dwh
         +tags: ["dwh", "dim"]
+      facts:
+        +materialized: table
+        +schema: dwh
+        +tags: ["dwh", "fact"]

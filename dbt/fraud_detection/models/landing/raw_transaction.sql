@@ -10,8 +10,7 @@ WITH base AS (
         Lon,
         Channel,
         MerchantID,
-        ingestion_date,
-        TimestampMonth
+        current_localtimestamp() as ingestion_date
     FROM {{ source('fraud_data', 'transactions') }}
 )
 

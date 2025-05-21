@@ -12,18 +12,23 @@
   This is where we add all the analytical features derived from dimension tables.
 */
 
-WITH fact_transactions AS (
+WITH stg_transaction AS (
     SELECT *,
         -- Add any additional transaction attributes or derived metrics here
         CASE
-            WHEN transaction_amount > 1000 THEN TRUE
+            WHEN transaction_amount <= 100 THEN 'Low'
+            WHEN transaction_amount <= 150 THEN 'Mid'
+            ELSE 'High'
+        END AS transaction_amount_tier,
+        CASE
+            WHEN transaction_amount > 150 THEN TRUE
             ELSE FALSE
         END AS is_high_value_transaction,
-        -- Transaction time of day categorization
+        -- Transaction time of day categorization using DuckDB's date_part
         CASE
-            WHEN EXTRACT(HOUR FROM transaction_timestamp) BETWEEN 0 AND 6 THEN 'Night (12AM-6AM)'
-            WHEN EXTRACT(HOUR FROM transaction_timestamp) BETWEEN 7 AND 11 THEN 'Morning (7AM-11AM)'
-            WHEN EXTRACT(HOUR FROM transaction_timestamp) BETWEEN 12 AND 17 THEN 'Afternoon (12PM-5PM)'
+            WHEN date_part('hour', transaction_timestamp) BETWEEN 0 AND 6 THEN 'Night (12AM-6AM)'
+            WHEN date_part('hour', transaction_timestamp) BETWEEN 7 AND 11 THEN 'Morning (7AM-11AM)'
+            WHEN date_part('hour', transaction_timestamp) BETWEEN 12 AND 17 THEN 'Afternoon (12PM-5PM)'
             ELSE 'Evening (6PM-11PM)'
         END AS transaction_time_of_day
      FROM {{ ref('stg_transaction') }}
@@ -68,7 +73,7 @@ enriched_transactions AS (
             ELSE NULL
         END AS distance_from_home
     FROM 
-        fact_transactions ft
+        stg_transaction ft
     LEFT JOIN 
         dim_customers c ON ft.customer_id = c.customer_id
 )
