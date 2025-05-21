@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: >
+      Customer dimension table that provides a comprehensive view of customers
+      including their risk profiles, demographics, and behavioral attributes. Includes derived fields for risk and age tiering.
+    columns:
+      - name: customer_sk
+        description: "Surrogate key for the customer (row_number)"
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Business key for the customer (from source)"
+        tests:
+          - unique
+          - not_null
+      - name: account_creation_date
+        description: "Date when the customer account was created"
+      - name: age
+        description: "Customer age"
+      - name: past_fraud_count
+        description: "Number of past fraud events for the customer"
+      - name: home_device
+        description: "Device most commonly used by the customer at home"
+      - name: home_ip
+        description: "Home IP address of the customer"
+      - name: home_latitude
+        description: "Latitude of the customer's home location"
+      - name: home_longitude
+        description: "Longitude of the customer's home location"
+      - name: has_fraud_history
+        description: "Boolean flag indicating if the customer has a history of fraudulent activity"
+      - name: account_age_days
+        description: "Number of days since the account was created (using DuckDB's age function)"
+      - name: account_creation_month
+        description: "Month of account creation (using DuckDB's date_part)"
+      - name: account_creation_year
+        description: "Year of account creation (using DuckDB's date_part)"
+      - name: age_tier
+        description: "Age category grouping for demographic analysis (Under 25, 25-34, etc.)"
+      - name: risk_level
+        description: "Risk level assigned to the customer based on past fraud count (Low, Medium, High)"
+
+  - name: dim_merchant
+    description: >
+      Merchant dimension table that provides a comprehensive view of merchants
+      including their risk categorization, business categories, and derived metrics. Includes flags and risk tiering.
+    columns:
+      - name: merchant_id
+        description: "Unique identifier for the merchant"
+        tests:
+          - not_null
+      - name: merchant_name
+        description: "Name of the merchant business"
+      - name: merchant_category
+        description: "Business category or industry of the merchant"
+      - name: merchant_risk_score
+        description: "Risk score assigned to the merchant (0.0 to 1.0)"
+      - name: ingestion_date
+        description: "Date/time the merchant record was ingested"
+      - name: is_high_risk_merchant
+        description: "Boolean flag indicating if the merchant is considered high risk (score >= 0.7)"
+      - name: merchant_risk_category
+        description: "Risk category based on the merchant risk score (Low Risk, Medium Risk, High Risk)"  

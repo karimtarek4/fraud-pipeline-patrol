@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: raw_merchant
+    description: "Raw merchant reference data, including category, risk score, and ingestion timestamp."
+    columns:
+      - name: MerchantID
+        description: "Business identifier for merchant (not unique per row)."
+        tests:
+          - not_null
+          - dbt_utils.not_constant
+
+      - name: MerchantName
+        description: "Merchant's display name."
+        tests:
+          - not_null
+          - dbt_utils.not_constant
+
+      - name: Category
+        description: "Merchant category."
+        tests:
+          - not_null
+          - dbt_utils.not_constant
+
+      - name: MerchantRiskScore
+        description: "Risk score for merchant (0.1–0.8)."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 1.0
+
+      - name: ingestion_date
+        description: "Timestamp when record was ingested."
+        tests:
+          - not_null
