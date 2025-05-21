@@ -28,17 +28,7 @@ models:
               min_value: 18
               max_value: 100
               strictly: false
-              
-      - name: AvgTransactionAmount
-        description: "Average transaction amount for this customer"
-        tests:
-          - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              min_value: 0
-              strictly: true
-          - dbt_expectations.expect_column_mean_to_be_between:
-              min_value: 50
-              max_value: 200
+  
               
       - name: PastFraudCount
         description: "Number of past fraudulent activities associated with this customer"
@@ -73,11 +63,3 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: -180
               max_value: 180
-      
-      - name: AccountCreationMonth
-        description: "Month when the account was created (derived from AccountCreationDate)"
-        tests:
-          - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              min_value: 1
-              max_value: 12

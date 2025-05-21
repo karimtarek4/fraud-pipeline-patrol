@@ -77,7 +77,7 @@ models:
       - name: is_weekend_login
         description: "Boolean indicating if login occurred on a weekend"
 
-  - name: stg_transactions
+  - name: stg_transaction
     description: "Cleaned, standardized transaction data with derived fraud risk indicators"
     columns:
       - name: transaction_id

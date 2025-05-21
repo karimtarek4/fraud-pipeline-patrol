@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: fact_transaction
+    description: >
+      Transaction fact table that extends the core fact table with dimension attributes and adds fraud detection metrics and indicators.
+    columns:
+      - name: transaction_id
+        description: "Unique identifier for the transaction"
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Foreign key to the customer dimension"
+        tests:
+          - not_null
+      - name: merchant_id
+        description: "Foreign key to the merchant dimension"
+        tests:
+          - not_null
+      - name: transaction_timestamp
+        description: "Timestamp when the transaction occurred"
+      - name: transaction_amount
+        description: "Amount of the transaction"
+      - name: transaction_amount_tier
+        description: "Categorization of transaction amount (Low, Mid, High)"
+      - name: device_id
+        description: "Device identifier used for the transaction"
+      - name: ip_address
+        description: "IP address used for the transaction"
+      - name: channel
+        description: "Channel through which the transaction was made"
+      - name: latitude
+        description: "Latitude of the transaction location"
+      - name: longitude
+        description: "Longitude of the transaction location"
+      - name: transaction_time_of_day
+        description: "Categorization of transaction time (Night, Morning, Afternoon, Evening)"
+      - name: is_high_value_transaction
+        description: "Boolean flag indicating if the transaction is high value (amount > 150)"
+      - name: has_elevated_fraud_risk
+        description: "Boolean flag indicating if the transaction has elevated risk based on multiple factors"
+      - name: distance_from_home
+        description: "Calculated distance between the transaction location and the customer's home location"
+
+  - name: fact_login_attempt
+    description: >
+      Login attempts fact table that links to the customer dimension and provides login pattern analysis for fraud detection.
+    columns:
+      - name: login_attempt_id
+        description: "Surrogate key for the login attempt (hash of customer_id and login_timestamp)"
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Foreign key to the customer dimension"
+        tests:
+          - not_null
+      - name: login_timestamp
+        description: "Timestamp when the login attempt occurred"
+      - name: is_success
+        description: "Boolean flag indicating if the login attempt was successful"
+      - name: login_month
+        description: "Month of the login attempt (DuckDB date_part)"
+      - name: login_year
+        description: "Year of the login attempt (DuckDB date_part)"
+      - name: login_day_of_week
+        description: "Day of week of the login attempt (DuckDB date_part, 0=Sunday)"
+      - name: login_hour
+        description: "Hour of the login attempt (DuckDB date_part)"
+      - name: login_time_of_day
+        description: "Categorization of login time (Night, Morning, Afternoon, Evening)"
+      - name: is_weekend_login
+        description: "Boolean flag indicating if the login attempt occurred on a weekend"
+      - name: total_login_attempts
+        description: "Total number of login attempts by the customer"
+      - name: failed_login_attempts
+        description: "Total number of failed login attempts by the customer"
+      - name: weekend_login_attempts
+        description: "Total number of weekend login attempts by the customer"
+      - name: night_login_attempts
+        description: "Total number of night login attempts by the customer"

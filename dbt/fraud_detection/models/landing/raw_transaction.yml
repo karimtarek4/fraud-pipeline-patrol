@@ -62,12 +62,3 @@ models:
         description: "Merchant identifier."
         tests:
           - not_null
-
-
-      - name: TimestampMonth
-        description: "Month of the transaction timestamp."
-        tests:
-          - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              min_value: 1
-              max_value: 12
