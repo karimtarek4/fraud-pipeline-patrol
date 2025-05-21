@@ -1,10 +1,3 @@
-{{
-  config(
-    materialized='table',
-    tags=['fact', 'core']
-  )
-}}
-
 /*
   Enriched transactions model that extends the core fact table with dimension attributes
   and adds fraud detection metrics and indicators.

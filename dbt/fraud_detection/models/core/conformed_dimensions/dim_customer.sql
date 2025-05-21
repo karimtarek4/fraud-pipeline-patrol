@@ -1,9 +1,3 @@
-{{
-  config(
-    materialized='table',
-    tags=['dim', 'core']
-  )
-}}
 
 /*
   Customer dimension table that provides a comprehensive view of customers

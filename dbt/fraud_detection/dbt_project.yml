@@ -48,15 +48,15 @@ models:
     marts:
       +materialized: view
       +schema: dwh
-      +tags: ["dwh", "marts"]
+      +tags: ["dwh", "mart"]
     
     # Dimensional warehouse models (final presentation layer)
     core:
       conformed_dimensions:
         +materialized: view
         +schema: dwh
-        +tags: ["dwh", "dim"]
+        +tags: ["core", "dim"]
       facts:
         +materialized: table
         +schema: dwh
-        +tags: ["dwh", "fact"]
+        +tags: ["core", "fact"]

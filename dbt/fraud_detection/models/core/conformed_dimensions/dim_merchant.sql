@@ -1,10 +1,3 @@
-{{
-  config(
-    materialized='table',
-    tags=['dim', 'core']
-  )
-}}
-
 /*
   Merchant dimension table that provides a comprehensive view of merchants
   including their risk categorization, business categories, and derived metrics.

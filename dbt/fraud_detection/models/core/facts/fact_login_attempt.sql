@@ -1,10 +1,3 @@
-{{
-  config(
-    materialized='table',
-    tags=['fact', 'core']
-  )
-}}
-
 /*
   Login attempts fact table that links to the customer dimension
   and provides login pattern analysis for fraud detection.

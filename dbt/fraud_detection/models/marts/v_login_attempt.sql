@@ -1,10 +1,3 @@
-{{
-  config(
-    materialized='view',
-    tags=['bi', 'mart']
-  )
-}}
-
 SELECT 
     -- Combine using surrogate key
     l.login_attempt_id,

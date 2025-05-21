@@ -1,10 +1,3 @@
-{{
-  config(
-    materialized='table',
-    tags=['staging', 'cleaned']
-  )
-}}
-
 WITH source AS (
     SELECT * FROM {{ ref('raw_login_attempt') }}
 ),
