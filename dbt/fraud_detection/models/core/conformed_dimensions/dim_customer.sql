@@ -17,13 +17,15 @@ WITH stg_customer AS (
 -- Add any additional customer attributes or aggregated metrics
 derived_columns AS (
     SELECT
-        stg_customer.*,
+        *,
         -- flags
         (past_fraud_count > 0) AS has_fraud_history,
         -- dates
-        EXTRACT(Month FROM account_creation_date) AS account_creation_month,
-        EXTRACT(YEAR FROM account_creation_date) AS account_creation_year,
-        EXTRACT(DAY FROM age(account_creation_date)) AS account_age_days,
+        -- Use DuckDB's date_part function for better performance
+        date_part('month', account_creation_date) AS account_creation_month,
+        date_part('year', account_creation_date) AS account_creation_year,
+        -- Use DuckDB's datediff function for cleaner date calculations
+        datediff('day', account_creation_date, current_date()) AS account_age_days,
         -- Derived categorical grouping 
         CASE
             WHEN age < 25 THEN 'Under 25'
@@ -43,7 +45,10 @@ derived_columns AS (
     FROM stg_customer
 )
 
+-- Final selection with surrogate key
 SELECT
+    -- Generate surrogate key using ROW_NUMBER for integer-based key
+    row_number() over (order by customer_id) as customer_sk,
     customer_id,
     account_creation_date,
     age,
