@@ -14,6 +14,7 @@ from minio.error import S3Error
 import pandas as pd
 import logging
 from airflow.sensors.external_task import ExternalTaskSensor
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -140,7 +141,7 @@ with DAG(
         execution_delta=timedelta(minutes=0),  # delta between the two DAGs (good if they are scheduled to run at the same time)
         timeout=600,  # Increase timeout to 10 minutes to allow data generation to complete
         mode='reschedule',  # Free up worker while waiting
-        poke_interval=30,  # Check every 30 seconds
+        poke_interval=10,  # Check every 10 seconds
     )
     # Create the upload task
     upload_partitioned_data_to_minio_task = PythonOperator(
@@ -149,5 +150,11 @@ with DAG(
         dag=dag,
     )
     
+    # Trigger run_dbt_dag after upload is complete
+    trigger_run_dbt_dag = TriggerDagRunOperator(
+        task_id='trigger_run_dbt_dag',
+        trigger_dag_id='run_dbt_dag',
+    )
+
     # Define task dependencies
-    wait_for_generate_dag >> upload_partitioned_data_to_minio_task 
+    wait_for_generate_dag >> upload_partitioned_data_to_minio_task >> trigger_run_dbt_dag
