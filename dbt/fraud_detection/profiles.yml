@@ -1,0 +1,18 @@
+fraud_detection:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: dev.duckdb
+      extensions:
+        - httpfs
+        - parquet
+      settings:
+        s3_region: us-east-1
+        s3_access_key_id: minioadmin
+        s3_secret_access_key: minioadmin
+        s3_endpoint: "{{ env_var('S3_ENDPOINT', 'localhost:9000') }}"
+        s3_url_style: path
+        s3_use_ssl: false
+
+  target: dev
