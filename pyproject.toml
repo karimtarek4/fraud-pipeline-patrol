@@ -24,3 +24,6 @@ dbterd = { git = "https://github.com/intellishore/dbt-erdiagram-generator", subd
 members = [
     "dbt/fraud_detection",
 ]
+
+[tool.setuptools.packages.find]
+include = ["fraud_detection"]
