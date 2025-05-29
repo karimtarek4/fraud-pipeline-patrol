@@ -1,3 +1,10 @@
+{{ config(
+    materialized='external',
+    location='s3://fraud-data-processed/marts/v_transaction.parquet',
+    format='parquet'
+) }}
+
+
 with final as (
     SELECT
         *,
