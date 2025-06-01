@@ -16,9 +16,11 @@ with DAG(
     dag_id='run_dbt_dag',
     default_args=default_args,
     description='Run DBT models after data is uploaded to MinIO',
-    schedule_interval='*/10 * * * *',  # Every 10 minutes
     catchup=False,
-    is_paused_upon_creation=False
+    is_paused_upon_creation=False,
+    schedule_interval=None,
+    max_active_runs=1,  # Ensure only one run at a time
+      # This DAG is triggered manually or by another DAG
 ) as dag:
 
     run_dbt = BashOperator(
