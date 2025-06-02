@@ -14,6 +14,7 @@ from minio.error import S3Error
 import pandas as pd
 import logging
 from airflow.sensors.external_task import ExternalTaskSensor
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -35,9 +36,10 @@ with DAG(
     dag_id='upload_to_minio_dag',
     default_args=default_args,
     description='Load partitioned data to MinIO',
-    schedule_interval='*/3 * * * *',  # Run every 3 minutes
     catchup=False,
-    is_paused_upon_creation=False
+    is_paused_upon_creation=False,
+    schedule_interval=None,
+    max_active_runs=1,  # Ensure only one run at a time
 ) as dag:
 
 
@@ -131,17 +133,6 @@ with DAG(
             logger.error(f"Unexpected error: {e}")
             raise
 
-    # Add a sensor to wait for the generate_and_partition_data_dag to complete
-    wait_for_generate_dag = ExternalTaskSensor(
-        task_id='wait_for_generate_dag',
-        external_dag_id='generate_and_partition_data_dag',
-        external_task_id=None,  # Wait for the entire DAG to complete
-        allowed_states=['success'], # Only proceed if the external DAG is successful
-        execution_delta=timedelta(minutes=0),  # delta between the two DAGs (good if they are scheduled to run at the same time)
-        timeout=600,  # Increase timeout to 10 minutes to allow data generation to complete
-        mode='reschedule',  # Free up worker while waiting
-        poke_interval=30,  # Check every 30 seconds
-    )
     # Create the upload task
     upload_partitioned_data_to_minio_task = PythonOperator(
         task_id='upload_partitioned_data_to_minio',
@@ -149,5 +140,11 @@ with DAG(
         dag=dag,
     )
     
+    # Trigger run_dbt_dag after upload is complete
+    trigger_run_dbt_dag = TriggerDagRunOperator(
+        task_id='trigger_run_dbt_dag',
+        trigger_dag_id='run_dbt_dag',
+    )
+
     # Define task dependencies
-    wait_for_generate_dag >> upload_partitioned_data_to_minio_task 
+    upload_partitioned_data_to_minio_task >> trigger_run_dbt_dag

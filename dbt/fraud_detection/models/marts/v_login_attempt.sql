@@ -1,3 +1,9 @@
+{{ config(
+    materialized='external',
+    location='s3://fraud-data-processed/marts/v_login_attempt.parquet',
+    format='parquet'
+) }}
+
 SELECT 
     -- Combine using surrogate key
     l.login_attempt_id,
