@@ -1,17 +1,21 @@
+
 import duckdb
 import pandas as pd
 from datetime import timedelta
 from pathlib import Path
 import os
+import psycopg2
+from psycopg2 import sql
+from datetime import datetime
 
 
 # ================================
 # CONFIGURATION SECTION
 # ================================
 # These are your MinIO/S3 and data mart connection settings.
-S3_ACCESS_KEY = "minioadmin"
-S3_SECRET_KEY = "minioadmin"
-S3_ENDPOINT = "localhost:9000"
+S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "minioadmin")
+S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "minioadmin")
+S3_ENDPOINT = os.environ.get("S3_ENDPOINT", "localhost:9000")
 TRANSACTION_MART = "s3://fraud-data-processed/marts/v_transaction.parquet"
 LOGIN_MART = "s3://fraud-data-processed/marts/v_login_attempt.parquet"
 RISK_THRESHOLD = 5  # Any transaction with this score or higher will be flagged as risky
@@ -39,6 +43,66 @@ def ensure_dirs(dirs):
     for d in dirs:
         os.makedirs(d, exist_ok=True)
 
+
+# ================================
+# POSTGRES CONNECTION UTILS
+# ================================
+def get_postgres_conn():
+    """
+    Connect to the Postgres service defined in docker-compose using credentials from environment variables or defaults.
+    """
+    host = os.environ.get("POSTGRES_HOST", "localhost")
+    port = os.environ.get("POSTGRES_PORT", "5434")
+    user = os.environ.get("POSTGRES_USER", "airflow")
+    password = os.environ.get("POSTGRES_PASSWORD", "airflow")
+    db = os.environ.get("POSTGRES_DB", "airflow")
+    return psycopg2.connect(
+        host=host,
+        port=port,
+        user=user,
+        password=password,
+        dbname=db
+    )
+
+def create_alerts_table_if_not_exists(conn, table_name="fraud_alerts"):
+    """
+    Create the alerts table if it doesn't exist.
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql.SQL(f'''
+            CREATE TABLE IF NOT EXISTS {table_name} (
+                id SERIAL PRIMARY KEY,
+                transaction_id VARCHAR(255),
+                customer_id VARCHAR(255),
+                transaction_timestamp TIMESTAMP,
+                risk_score INT,
+                flags TEXT,
+                inserted_at TIMESTAMP DEFAULT NOW()
+            )
+        '''))
+        conn.commit()
+
+def insert_alerts_df(conn, df, table_name="fraud_alerts"):
+    """
+    Insert the alerts DataFrame into the Postgres table.
+    """
+    if df.empty:
+        return
+    with conn.cursor() as cur:
+        for _, row in df.iterrows():
+            cur.execute(sql.SQL(f'''
+                INSERT INTO {table_name} (transaction_id, customer_id, transaction_timestamp, risk_score, flags, inserted_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            '''), (
+                str(row['transaction_id']),
+                str(row['customer_id']),
+                row['transaction_timestamp'],
+                int(row['risk_score']),
+                row['flags'],
+                datetime.now()
+            ))
+        conn.commit()
+
 # ================================
 # CONNECT TO MINIO VIA DUCKDB
 # ================================
@@ -64,7 +128,7 @@ def load_marts(con):
     Load transaction and login mart data as Pandas DataFrames.
     Convert their timestamp columns to datetime type for easier comparisons.
     """
-    tx = con.execute(f"SELECT * FROM '{TRANSACTION_MART}'").fetchdf()
+    tx = con.execute(f"SELECT * FROM '{TRANSACTION_MART}' Limit 1000").fetchdf()
     logins = con.execute(f"SELECT * FROM '{LOGIN_MART}'").fetchdf()
     tx['transaction_timestamp'] = pd.to_datetime(tx['transaction_timestamp'])
     logins['login_timestamp'] = pd.to_datetime(logins['login_timestamp'])
@@ -268,3 +332,13 @@ if __name__ == "__main__":
     ensure_dirs([results_dir])
     alerts.to_parquet(results_dir / 'fraud_alerts.parquet', index=False)
     print("Alerts saved to data/results/fraud_alerts.parquet.")
+
+    # Step 7: Save alerts to Postgres
+    try:
+        pg_conn = get_postgres_conn()
+        create_alerts_table_if_not_exists(pg_conn)
+        insert_alerts_df(pg_conn, alerts)
+        pg_conn.close()
+        print("Alerts saved to Postgres table 'fraud_alerts'.")
+    except Exception as e:
+        print(f"Failed to save alerts to Postgres: {e}")
