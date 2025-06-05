@@ -11,6 +11,19 @@ services:
     volumes:
       - ./minio/data:/data
 
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   airflow:
     build:
       context: .
@@ -24,14 +37,25 @@ services:
       - .env
     environment:
       - S3_ENDPOINT=minio:9000
+      - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
       - ./scripts:/opt/airflow/scripts
+      - ./scoring/scripts:/opt/airflow/scoring/scripts
       - ./data/raw:/opt/airflow/data/raw
       - ./data/processed:/opt/airflow/data/processed
       # Mount our custom init script
       - ./airflow/scripts/entrypoint.sh:/entrypoint.sh:ro
     # Run that script as the container’s entrypoint
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
+
+volumes:
+  postgres_data:
