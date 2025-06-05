@@ -3,7 +3,7 @@ name = "fraud-pipeline-patrol"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "dbt-core>=1.9.4",
     "dbt-coverage>=0.3.9",
@@ -13,6 +13,7 @@ dependencies = [
     "fastparquet>=2024.11.0",
     "numpy>=2.2.5",
     "pandas>=2.2.3",
+    "psycopg2-binary>=2.9.0",
     "pyarrow>=20.0.0",
     "requests>=2.32.3",
 ]
