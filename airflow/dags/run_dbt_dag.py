@@ -22,8 +22,16 @@ with DAG(
     max_active_runs=1,  # Ensure only one run at a time
       # This DAG is triggered manually or by another DAG
 ) as dag:
+    
+    dbt_deps = BashOperator(
+        task_id='install_deps',
+        bash_command='export PATH="/app/.venv/bin:$PATH" && cd $DBT_PROJECT_DIR && dbt deps --profiles-dir /home/airflow/.dbt',
+        env={
+            'DBT_PROJECT_DIR': '/app/dbt/fraud_detection'
+        },
+    )
 
-    run_dbt = BashOperator(
+    dbt_run = BashOperator(
         task_id='run_dbt',
         bash_command='export PATH="/app/.venv/bin:$PATH" && cd $DBT_PROJECT_DIR && dbt run --profiles-dir /home/airflow/.dbt',
         env={
@@ -36,4 +44,4 @@ with DAG(
         },
     )
 
-    run_dbt
+    dbt_deps >> dbt_run
