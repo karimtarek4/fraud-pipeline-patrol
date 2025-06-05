@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.sensors.external_task import ExternalTaskSensor
 from datetime import datetime, timedelta
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 # Default arguments for the DAG
 default_args = {
@@ -44,4 +45,9 @@ with DAG(
         },
     )
 
-    dbt_deps >> dbt_run
+    trigger_score_transactions = TriggerDagRunOperator(
+        task_id='trigger_score_transactions_dag',
+        trigger_dag_id='score_transactions_dag',
+    )
+
+    dbt_deps >> dbt_run >> trigger_score_transactions
