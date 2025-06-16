@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.sensors.external_task import ExternalTaskSensor
 from datetime import datetime, timedelta
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 # Default arguments for the DAG
 default_args = {
@@ -22,8 +23,16 @@ with DAG(
     max_active_runs=1,  # Ensure only one run at a time
       # This DAG is triggered manually or by another DAG
 ) as dag:
+    
+    dbt_deps = BashOperator(
+        task_id='install_deps',
+        bash_command='export PATH="/app/.venv/bin:$PATH" && cd $DBT_PROJECT_DIR && dbt deps --profiles-dir /home/airflow/.dbt',
+        env={
+            'DBT_PROJECT_DIR': '/app/dbt/fraud_detection'
+        },
+    )
 
-    run_dbt = BashOperator(
+    dbt_run = BashOperator(
         task_id='run_dbt',
         bash_command='export PATH="/app/.venv/bin:$PATH" && cd $DBT_PROJECT_DIR && dbt run --profiles-dir /home/airflow/.dbt',
         env={
@@ -36,4 +45,9 @@ with DAG(
         },
     )
 
-    run_dbt
+    trigger_score_transactions = TriggerDagRunOperator(
+        task_id='trigger_score_transactions_dag',
+        trigger_dag_id='score_transactions_dag',
+    )
+
+    dbt_deps >> dbt_run >> trigger_score_transactions

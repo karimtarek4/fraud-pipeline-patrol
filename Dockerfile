@@ -32,6 +32,11 @@ RUN mkdir -p /home/airflow/.dbt \
     && cp /app/dbt/fraud_detection/profiles.yml /home/airflow/.dbt/profiles.yml \
     && chown -R airflow:0 /home/airflow/.dbt
 
+
+# Create results directory and set permissions
+RUN mkdir -p /opt/airflow/data/results \
+    && chown -R airflow:0 /opt/airflow/data/results
+
 # Switch back to airflow user
 USER airflow
 

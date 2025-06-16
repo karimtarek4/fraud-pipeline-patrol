@@ -51,15 +51,15 @@ with DAG(
                 DagRun.state.in_([State.SUCCESS, State.FAILED, State.SKIPPED])
             ).count()
         if previous_runs > 0:
-            return 'wait_for_dbt_not_running'
+            return 'wait_for_scoring_not_running'
         else:
             return 'generate_data'
         
-    def wait_until_dbt_not_running(**context):
+    def wait_until_scoring_not_running(**context):
         while True:
             with create_session() as session:
                 running = session.query(DagRun).filter(
-                    DagRun.dag_id == 'run_dbt_dag',
+                    DagRun.dag_id == 'score_transactions_dag',
                     DagRun.state == State.RUNNING
                 ).count()
             if running == 0:
@@ -73,9 +73,9 @@ with DAG(
         dag=dag,
     )
 
-    wait_for_dbt_not_running = PythonOperator(
-        task_id='wait_for_dbt_not_running',
-        python_callable=wait_until_dbt_not_running,
+    wait_for_scoring_not_running = PythonOperator(
+        task_id='wait_for_scoring_not_running',
+        python_callable=wait_until_scoring_not_running,
         provide_context=True,
         dag=dag,
     )
@@ -102,6 +102,6 @@ with DAG(
     )
 
     # Set task dependencies for correct dynamic flow
-    branch_should_wait_task >> [wait_for_dbt_not_running, generate_data_task]
-    wait_for_dbt_not_running >> generate_data_task
+    branch_should_wait_task >> [wait_for_scoring_not_running, generate_data_task]
+    wait_for_scoring_not_running >> generate_data_task
     generate_data_task >> partition_data_task >> trigger_run_upload_to_minio_dag
