@@ -4,7 +4,8 @@ FROM apache/airflow:2.8.1
 RUN pip install \
     apache-airflow-providers-amazon \
     minio \
-    duckdb
+    "duckdb>=0.9.2,<1.0.0" --only-binary=:all: \
+    psycopg2-binary
 
 # Install uv
 RUN pip install uv
