@@ -1,0 +1,58 @@
+from airflow.decorators import dag, task
+from datetime import datetime, timedelta
+import os
+import psycopg2
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../.env'))
+
+# Default arguments for the DAG
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': datetime(2025, 5, 10),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=1),
+}
+
+@task()
+def alert_customers_task():
+    """
+    Connects to Postgres, selects all customer_ids from fraud_alerts, and simulates sending emails.
+    """
+    try:
+        host = os.environ.get("POSTGRES_HOST", "localhost")
+        port = os.environ.get("POSTGRES_PORT", "5434")
+        user = os.environ.get("POSTGRES_USER", "airflow")
+        password = os.environ.get("POSTGRES_PASSWORD", "airflow")
+        db = os.environ.get("POSTGRES_DB", "airflow")
+        conn = psycopg2.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            dbname=db
+        )
+        with conn.cursor() as cur:
+            cur.execute('SELECT customer_id FROM fraud_alerts;')
+            customer_ids = cur.fetchall()
+            for row in customer_ids:
+                customer_id = row[0]
+                print(f"Sending email to customer {customer_id}...")
+        conn.close()
+    except Exception as e:
+        print(f"Failed to alert customers: {e}")
+
+@dag(
+    default_args=default_args,
+    description='Print number of records in fraud_alerts table in Postgres',
+    catchup=False,
+    is_paused_upon_creation=False,
+    schedule_interval=None,
+    max_active_runs=1,
+)
+def alert_users_dag():
+    alert_customers_task()
+
+dag = alert_users_dag()

@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 import subprocess
 import os
 from dotenv import load_dotenv
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../.env'))
@@ -41,6 +43,12 @@ def run_score_transactions_task():
     max_active_runs=1,
 )
 def score_transactions_dag():
-    run_score_transactions_task()
+
+    trigger_alert_users_dag_task = TriggerDagRunOperator(
+        task_id='trigger_alert_users_dag_task',
+        trigger_dag_id='alert_users_dag',
+    )
+
+    run_score_transactions_task() >> trigger_alert_users_dag_task
 
 dag = score_transactions_dag()
