@@ -54,6 +54,7 @@ services:
       - ./scoring/scripts:/opt/airflow/scoring/scripts
       - ./data/raw:/opt/airflow/data/raw
       - ./data/processed:/opt/airflow/data/processed
+      - ./helpers:/opt/airflow/helpers
       # Mount our custom init script
       - ./airflow/scripts/entrypoint.sh:/entrypoint.sh:ro
     # Run that script as the container’s entrypoint

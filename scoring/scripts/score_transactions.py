@@ -4,10 +4,11 @@ import pandas as pd
 from datetime import timedelta
 from pathlib import Path
 import os
-import psycopg2
 from psycopg2 import sql
 from datetime import datetime
-
+import sys
+sys.path.append('/opt/airflow')
+from helpers.postgres import get_postgres_conn
 
 # ================================
 # CONFIGURATION SECTION
@@ -43,26 +44,6 @@ def ensure_dirs(dirs):
     for d in dirs:
         os.makedirs(d, exist_ok=True)
 
-
-# ================================
-# POSTGRES CONNECTION UTILS
-# ================================
-def get_postgres_conn():
-    """
-    Connect to the Postgres service defined in docker-compose using credentials from environment variables or defaults.
-    """
-    host = os.environ.get("POSTGRES_HOST", "localhost")
-    port = os.environ.get("POSTGRES_PORT", "5434")
-    user = os.environ.get("POSTGRES_USER", "airflow")
-    password = os.environ.get("POSTGRES_PASSWORD", "airflow")
-    db = os.environ.get("POSTGRES_DB", "airflow")
-    return psycopg2.connect(
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        dbname=db
-    )
 
 def create_alerts_table_if_not_exists(conn, table_name="fraud_alerts"):
     """

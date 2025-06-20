@@ -1,11 +1,11 @@
 from airflow.decorators import dag, task
 from datetime import datetime, timedelta
 import os
-import psycopg2
-from dotenv import load_dotenv
+import sys
+import os
+sys.path.append('/opt/airflow')
+from helpers.postgres import get_postgres_conn
 
-# Load environment variables from .env file
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../.env'))
 
 # Default arguments for the DAG
 default_args = {
@@ -22,18 +22,7 @@ def alert_customers_task():
     Connects to Postgres, selects all customer_ids from fraud_alerts, and simulates sending emails.
     """
     try:
-        host = os.environ.get("POSTGRES_HOST", "localhost")
-        port = os.environ.get("POSTGRES_PORT", "5434")
-        user = os.environ.get("POSTGRES_USER", "airflow")
-        password = os.environ.get("POSTGRES_PASSWORD", "airflow")
-        db = os.environ.get("POSTGRES_DB", "airflow")
-        conn = psycopg2.connect(
-            host=host,
-            port=port,
-            user=user,
-            password=password,
-            dbname=db
-        )
+        conn = get_postgres_conn()
         with conn.cursor() as cur:
             cur.execute('SELECT customer_id FROM fraud_alerts;')
             customer_ids = cur.fetchall()
