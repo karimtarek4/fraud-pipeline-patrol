@@ -11,10 +11,12 @@ dependencies = [
     "dbterd",
     "duckdb>=1.2.2",
     "fastparquet>=2024.11.0",
+    "minio>=7.2.15",
     "numpy>=2.2.5",
     "pandas>=2.2.3",
     "psycopg2-binary>=2.9.0",
     "pyarrow>=20.0.0",
+    "python-dotenv>=1.1.0",
     "requests>=2.32.3",
 ]
 

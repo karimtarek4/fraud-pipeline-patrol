@@ -1,8 +1,14 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.decorators import dag, task
 from datetime import datetime, timedelta
-import logging
 import subprocess
+import os
+from dotenv import load_dotenv
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../.env'))
+
 
 # Default arguments for the DAG
 default_args = {
@@ -13,33 +19,36 @@ default_args = {
     'retry_delay': timedelta(minutes=1),
 }
 
-def run_score_transactions():
+@task()
+def run_score_transactions_task():
     """
     Runs the score_transactions.py script.
     """
-    SCRIPT_PATH = '/opt/airflow/scoring/scripts/score_transactions.py'
-    logging.info(f"Running scoring script: {SCRIPT_PATH}")
+    # Load environment variables from .env file
+    SCRIPT_PATH = os.getenv('SCORE_TRANSACTIONS_SCRIPT_PATH', '/opt/airflow/scoring/scripts/score_transactions.py')
     result = subprocess.run(['python', SCRIPT_PATH], capture_output=True, text=True)
-    logging.info(f"Script output:\n{result.stdout}")
+    if result.stdout:
+        print(f"Script output:\n{result.stdout}")
     if result.returncode != 0:
-        logging.error(f"Script failed with error:\n{result.stderr}")
+        print(f"Script failed with error:\n{result.stderr}")
         raise Exception("score_transactions.py failed")
-    logging.info("Scoring script completed successfully.")
+    print("Scoring script completed successfully.")
 
-with DAG(
-    dag_id='score_transactions_dag',
+@dag(
     default_args=default_args,
     description='Run scoring logic on transactions after DBT models are built',
     catchup=False,
     is_paused_upon_creation=False,
     schedule_interval=None,
     max_active_runs=1,
-) as dag:
+)
+def score_transactions_dag():
 
-    score_transactions_task = PythonOperator(
-        task_id='score_transactions',
-        python_callable=run_score_transactions,
-        dag=dag,
+    trigger_alert_users_dag_task = TriggerDagRunOperator(
+        task_id='trigger_alert_users_dag_task',
+        trigger_dag_id='alert_users_dag',
     )
 
-    score_transactions_task
+    run_score_transactions_task() >> trigger_alert_users_dag_task
+
+dag = score_transactions_dag()
