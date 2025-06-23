@@ -5,6 +5,7 @@ import sys
 import os
 sys.path.append('/opt/airflow')
 from helpers.postgres import get_postgres_conn
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 
 # Default arguments for the DAG
@@ -42,6 +43,12 @@ def alert_customers_task():
     max_active_runs=1,
 )
 def alert_users_dag():
-    alert_customers_task()
+
+    trigger_generate_visualizations_task = TriggerDagRunOperator(
+        task_id='trigger_generate_visualizations_task',
+        trigger_dag_id='visualize_alert_data_dag',
+    )
+
+    alert_customers_task() >> trigger_generate_visualizations_task
 
 dag = alert_users_dag()

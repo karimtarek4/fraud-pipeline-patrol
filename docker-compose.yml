@@ -57,6 +57,7 @@ services:
       - ./helpers:/opt/airflow/helpers
       # Mount our custom init script
       - ./airflow/scripts/entrypoint.sh:/entrypoint.sh:ro
+      - ./visualizations:/opt/airflow/visualizations
     # Run that script as the container’s entrypoint
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
 
