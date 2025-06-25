@@ -1,6 +1,13 @@
 
 # 🛡️ Fraud Pipeline Patrol — Modular, Production-Inspired Fraud Detection
 
+![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
+![dbt](https://img.shields.io/badge/dbt-%23FF694B.svg?logo=dbt&logoColor=white)
+![Airflow](https://img.shields.io/badge/Airflow-2.7.0-blue?logo=apache-airflow)
+![Docker](https://img.shields.io/badge/Docker-Desktop-blue?logo=docker)
+
+
+
 A modular, end-to-end fraud detection pipeline simulating real-world data workflows using Airflow, dbt, Python, and modern data tools. This project demonstrates advanced analytics engineering, orchestration, and modeling skills—built to impress and inspire!
 
 ---
