@@ -8,7 +8,7 @@ from psycopg2 import sql
 from datetime import datetime
 import sys
 sys.path.append('/opt/airflow')
-from helpers.postgres import get_postgres_conn
+from helpers.actualdata_postgres import get_actualdata_postgres_conn
 
 # ================================
 # CONFIGURATION SECTION
@@ -316,7 +316,7 @@ if __name__ == "__main__":
 
     # Step 7: Save alerts to Postgres
     try:
-        pg_conn = get_postgres_conn()
+        pg_conn = get_actualdata_postgres_conn()
         create_alerts_table_if_not_exists(pg_conn)
         insert_alerts_df(pg_conn, alerts)
         pg_conn.close()
