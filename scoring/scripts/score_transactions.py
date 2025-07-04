@@ -25,7 +25,7 @@ S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "minioadmin")
 S3_ENDPOINT = os.environ.get("S3_ENDPOINT", "localhost:9000")
 TRANSACTION_MART = "s3://fraud-data-processed/marts/v_transaction.parquet"
 LOGIN_MART = "s3://fraud-data-processed/marts/v_login_attempt.parquet"
-MODEL_PATH = str(Path(__file__).parent / "fraud_model.pkl")
+MODEL_PATH = str(Path(__file__).parent.parent / "fraud_model.pkl")
 
 RISK_THRESHOLD = 5  # Used only in rule-based scoring
 
@@ -107,7 +107,8 @@ def insert_alerts_df(conn, df, table_name="fraud_alerts"):
 # ================================
 def connect_to_minio():
     con = duckdb.connect()
-    con.execute("SET home_directory='../fraud-pipeline-patrol';")
+    # Set DuckDB home directory to /app for container compatibility
+    con.execute("SET home_directory='/app';")
     con.execute("INSTALL httpfs;")
     con.execute("LOAD httpfs;")
     con.execute(f"SET s3_access_key_id='{S3_ACCESS_KEY}';")

@@ -48,12 +48,18 @@ services:
       - POSTGRES_DB=airflow
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - ACTUALDATA_POSTGRES_HOST=actualdata-postgres
+      - ACTUALDATA_POSTGRES_PORT=5432
+      - ACTUALDATA_POSTGRES_USER=actualdata
+      - ACTUALDATA_POSTGRES_PASSWORD=actualdata_pass
+      - ACTUALDATA_POSTGRES_DB=actualdata
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
       - ./scripts:/opt/airflow/scripts
       - ./scoring/scripts:/opt/airflow/scoring/scripts
+      - ./scoring/scripts:/app/scoring/scripts
       - ./data/raw:/opt/airflow/data/raw
       - ./data/processed:/opt/airflow/data/processed
       - ./helpers:/opt/airflow/helpers

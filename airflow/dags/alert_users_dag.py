@@ -44,11 +44,6 @@ def alert_customers_task():
 )
 def alert_users_dag():
 
-    trigger_generate_visualizations_task = TriggerDagRunOperator(
-        task_id='trigger_generate_visualizations_task',
-        trigger_dag_id='visualize_alert_data_dag',
-    )
-
-    alert_customers_task() >> trigger_generate_visualizations_task
+    alert_customers_task()
 
 dag = alert_users_dag()
