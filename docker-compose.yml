@@ -53,6 +53,8 @@ services:
       - ACTUALDATA_POSTGRES_USER=actualdata
       - ACTUALDATA_POSTGRES_PASSWORD=actualdata_pass
       - ACTUALDATA_POSTGRES_DB=actualdata
+      - MB_HOSTNAME=metabase
+      - MB_PORT=3000
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
@@ -62,6 +64,7 @@ services:
       - ./scoring/scripts:/app/scoring/scripts
       - ./scoring:/opt/airflow/scoring
       - ./scoring:/app/scoring
+      - ./metabase:/opt/airflow/metabase
       - ./data/raw:/opt/airflow/data/raw
       - ./data/processed:/opt/airflow/data/processed
       - ./helpers:/opt/airflow/helpers
