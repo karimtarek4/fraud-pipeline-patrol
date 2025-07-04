@@ -58,11 +58,11 @@ def run_dbt_dag():
         },
     )
 
-    trigger_score_transactions_dag_task = TriggerDagRunOperator(
-        task_id='trigger_score_transactions_dag_task',
-        trigger_dag_id='score_transactions_dag',
+    trigger_ml_transaction_scoring_dag_task = TriggerDagRunOperator(
+        task_id='trigger_ml_transaction_scoring_dag_task',
+        trigger_dag_id='ml_transaction_scoring_dag',
     )
 
-    install_dbt_deps_task >> run_dbt_task >> trigger_score_transactions_dag_task
+    install_dbt_deps_task >> run_dbt_task >> trigger_ml_transaction_scoring_dag_task
 
 dag = run_dbt_dag()

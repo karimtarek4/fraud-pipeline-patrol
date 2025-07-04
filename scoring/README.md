@@ -1,66 +1,128 @@
-# 🏆 Scoring Module
+# 🛡️ Fraud Detection Model Development – Rule-Based Labeling + Supervised ML
 
-Welcome to the Scoring module of the Fraud Pipeline Patrol project! This component is responsible for the core fraud detection logic—analyzing enriched transaction and login data, applying risk rules, and surfacing actionable fraud alerts.
-
----
-
-## ⚙️ How the Scoring Script Works
-
-The main script, `score_transactions.py`, orchestrates the entire scoring process:
-
-1. **Connects to Data Marts:**
-   - Uses DuckDB to connect directly to Parquet marts (`v_transaction` and `v_login_attempt`) stored in MinIO/S3.
-
-2. **Loads Data:**
-   - Loads transaction and login attempt data into Pandas DataFrames for analysis.
-
-3. **Feature Engineering:**
-   - Enriches each transaction with behavioral and contextual features:
-     - Recent failed login attempts
-     - Geolocation mismatch
-     - High-risk merchant/customer flags
-     - Outlier detection on transaction amounts (z-score)
-     - Odd hours, weekend, and night activity
-
-4. **Risk Scoring:**
-   - Applies a set of explainable, rule-based scoring functions to each transaction.
-   - Each rule adds to the risk score and appends a flag if triggered (e.g., failed logins, geo mismatch, high-risk merchant).
-   - If the total risk score exceeds a configurable threshold, the transaction is flagged as a fraud alert.
-
-5. **Results Output:**
-   - Saves all flagged alerts as a Parquet file in `data/results/fraud_alerts.parquet` for downstream analytics and dashboards.
-   - Inserts alerts into the Postgres `fraud_alerts` table for further processing and notification.
+This project demonstrates how to build a production-inspired fraud detection model by combining rule-based labeling with supervised machine learning. It walks through the full data science pipeline: from behavioral feature engineering, to intuitive label creation, to model training, evaluation, and export.
 
 ---
 
-## 🧩 Integration in the Pipeline
+## 🧭 Project Objectives
 
-- The scoring script is triggered by the Airflow DAG `score_transactions_dag` after DBT marts are built and available.
-- The output alerts are used by downstream modules (e.g., alerting, visualization) to notify users and monitor fraud trends.
-
----
-
-## 📂 Directory Structure
-
-```
-scoring/
-  README.md  ← (You are here!)
-  scripts/
-    score_transactions.py
-  data/
-    results/
-      fraud_alerts.parquet
-```
+- Enrich transaction data with behavioral and contextual risk signals.
+- Design a transparent, rule-based fraud scoring system.
+- Generate weakly-supervised fraud labels using risk scores.
+- Train a machine learning model to detect fraud using enriched features.
+- Evaluate model performance using industry-relevant metrics.
+- Save the model for integration into a fraud scoring pipeline.
 
 ---
 
-## 🎯 Why This Approach?
+## 📂 Contents
 
-- **Explainability:** Rule-based scoring makes it easy to understand and audit why a transaction was flagged.
-- **Configurability:** Risk rules and thresholds are easily adjustable for experimentation and tuning.
-- **Performance:** DuckDB enables fast, direct querying of Parquet marts in object storage.
-- **Extensibility:** New rules and features can be added with minimal code changes.
+| Section | Description |
+|--------|-------------|
+| [Feature Engineering](#-feature-engineering) | Add behavioral context to raw transactions |
+| [Rule-Based Scoring & Labeling](#-rule-based-scoring--labeling) | Generate labels using a custom fraud score |
+| [Data Preparation](#-data-preparation) | Encode and split the data |
+| [Model Training & Evaluation](#-model-training--evaluation) | Train model, analyze features, assess performance |
+| [Model Export](#-model-export) | Save trained model for deployment |
+| [Next Steps](#-next-steps--improvements) | Opportunities for future improvement |
 
 ---
 
-For more details, see the `score_transactions.py` script. Happy scoring! 🚦
+## 🧪 Feature Engineering
+
+### 🔍 Goal:
+Enrich transactions with signals derived from customer login behavior and profile context.
+
+### ⚙️ Features Created:
+- `failed_logins_24h`: Number of failed logins in the 24h window before a transaction
+- `geo_mismatch`: Whether the transaction location differs from the customer’s home location
+- `odd_hours`: Last login happened between 12AM and 6AM
+- `weekend_login`: Last login occurred on a weekend
+- `night_login`: Custom signal for login during night hours
+
+### 🛠️ How:
+We joined each transaction with prior login events (same customer, before transaction) and engineered features from them. This gives us a richer behavioral context per transaction.
+
+---
+
+## 🏷️ Rule-Based Scoring & Labeling
+
+### 🔍 Problem:
+We had no real fraud labels. Instead of labeling fraud randomly, we built a scoring system based on domain logic.
+
+### 📐 Logic:
+Each transaction is scored based on features like:
+- Failed logins
+- Geo mismatch
+- Risky merchants
+- Fraud history
+- Time-based login anomalies
+- Z-score outliers in amount
+
+Each rule contributes a weight (score). If a transaction's total score exceeds a defined threshold (`RISK_THRESHOLD = 5`), it's labeled as fraud (`label = 1`).
+
+### ✅ Output:
+- `label`: Final target column used for model training
+- `risk_score`: Transparent risk score
+- `flags`: List of triggered fraud rules
+
+---
+
+## 🧹 Data Preparation
+
+### 🔢 Feature Set:
+Selected meaningful features:
+- Behavioral: `failed_logins_24h`, `night_login`, etc.
+- Profile: `customer_has_fraud_history`, `customer_past_fraud_count`
+- Context: `geo_mismatch`, `is_high_risk_merchant`, `transaction_amount`
+
+### 🔄 Encoding:
+Encoded `customer_risk_level` with ordinal values:
+- `Low` → 0
+- `Medium` → 1
+- `High` → 2
+
+### 🧪 Train/Test Split:
+Used `train_test_split()` with `stratify=y` to preserve fraud ratio.
+- 80% for training
+- 20% for evaluation
+
+---
+
+## 🌲 Model Training & Evaluation
+
+### 🧠 Trial 1 – Baseline Random Forest
+- Model: `RandomForestClassifier(n_estimators=100, max_depth=5)`
+- Features: All selected + encoded
+- Observation: `customer_risk_level` had 0% feature importance
+
+### 🔁 Trial 2 – Refined Model
+- Dropped `customer_risk_level`
+- Added `class_weight='balanced'` to handle fraud imbalance
+- Retrained the model
+
+### 📊 Feature Importance Highlights:
+- Top features: `is_high_risk_merchant`, `geo_mismatch`, `night_login`
+- Time-based behavior and risk flags dominated
+- `transaction_amount` and fraud history had moderate impact
+
+### 🧾 Evaluation Results:
+| Metric     | Score |
+|------------|-------|
+| Accuracy   | 0.99  |
+| Precision  | 0.97  |
+| Recall     | 0.97  |
+| F1 Score   | 0.97  |
+
+- **Precision (0.97)**: Very few false alarms
+- **Recall (0.97)**: Almost all real frauds were caught
+- **F1 Score (0.97)**: Well-balanced performance
+
+---
+
+## 💾 Model Export
+
+The final trained model was saved using `joblib`:
+
+```python
+joblib.dump(model_refined, "fraud_model.pkl")

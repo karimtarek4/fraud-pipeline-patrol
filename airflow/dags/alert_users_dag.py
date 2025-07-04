@@ -44,11 +44,11 @@ def alert_customers_task():
 )
 def alert_users_dag():
 
-    trigger_generate_visualizations_task = TriggerDagRunOperator(
-        task_id='trigger_generate_visualizations_task',
-        trigger_dag_id='visualize_alert_data_dag',
+    trigger_initialize_metabase_task = TriggerDagRunOperator(
+        task_id='trigger_initialize_metabase_task',
+        trigger_dag_id='initialize_metabase_dag',
     )
 
-    alert_customers_task() >> trigger_generate_visualizations_task
+    alert_customers_task() >> trigger_initialize_metabase_task
 
 dag = alert_users_dag()

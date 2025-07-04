@@ -42,7 +42,7 @@ def run_score_transactions_task():
     schedule_interval=None,
     max_active_runs=1,
 )
-def score_transactions_dag():
+def ml_transaction_scoring_dag():
 
     trigger_alert_users_dag_task = TriggerDagRunOperator(
         task_id='trigger_alert_users_dag_task',
@@ -51,4 +51,4 @@ def score_transactions_dag():
 
     run_score_transactions_task() >> trigger_alert_users_dag_task
 
-dag = score_transactions_dag()
+dag = ml_transaction_scoring_dag()
