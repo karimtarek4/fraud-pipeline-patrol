@@ -25,6 +25,7 @@ S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "minioadmin")
 S3_ENDPOINT = os.environ.get("S3_ENDPOINT", "localhost:9000")
 TRANSACTION_MART = "s3://fraud-data-processed/marts/v_transaction.parquet"
 LOGIN_MART = "s3://fraud-data-processed/marts/v_login_attempt.parquet"
+# Use parent directory for model path to support both /app/scoring/scripts and /opt/airflow/scoring/scripts
 MODEL_PATH = str(Path(__file__).parent.parent / "fraud_model.pkl")
 
 RISK_THRESHOLD = 5  # Used only in rule-based scoring

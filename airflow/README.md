@@ -19,7 +19,7 @@ The pipeline is composed of several modular DAGs, each responsible for a specifi
         [run_dbt_dag]
             │
             ▼
- [score_transactions_dag]
+ [ml_transaction_scoring_dag]
             │
             ▼
     [alert_users_dag]
@@ -54,11 +54,11 @@ The pipeline is composed of several modular DAGs, each responsible for a specifi
 - **Logic:**  
   - Installs DBT dependencies.
   - Executes DBT transformations.
-  - **Triggers:** `score_transactions_dag` after DBT run.
+  - **Triggers:** `ml_transaction_scoring_dag` after DBT run.
 
 ---
 
-### 4. `score_transactions_dag`
+### 4. `ml_transaction_scoring_dag`
 - **Purpose:** Scores transactions using the latest models and logic.
 - **Logic:**  
   - Runs the scoring script.
@@ -106,7 +106,7 @@ airflow/
     alert_users_dag.py
     generate_and_partition_data_dag.py
     run_dbt_dag.py
-    score_transactions_dag.py
+    ml_transaction_scoring_dag.py
     upload_to_minio_dag.py
     visualize_alert_data_dag.py
   README.md  ← (You are here!)

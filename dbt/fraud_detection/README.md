@@ -64,7 +64,7 @@ This module is designed following the principles of Kimball's dimensional modeli
 ### `v_transaction`
 - Combines transaction facts with customer and merchant dimensions.
 - Includes engineered features (risk scores, distance from home, high-risk flags).
-- Used as the primary input for the scoring pipeline (see Airflow DAGs: `score_transactions_dag`).
+- Used as the primary input for the scoring pipeline (see Airflow DAGs: `ml_transaction_scoring_dag`).
 
 ### `v_login_attempt`
 - Combines login attempt facts with customer risk attributes.

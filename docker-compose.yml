@@ -60,6 +60,8 @@ services:
       - ./scripts:/opt/airflow/scripts
       - ./scoring/scripts:/opt/airflow/scoring/scripts
       - ./scoring/scripts:/app/scoring/scripts
+      - ./scoring:/opt/airflow/scoring
+      - ./scoring:/app/scoring
       - ./data/raw:/opt/airflow/data/raw
       - ./data/processed:/opt/airflow/data/processed
       - ./helpers:/opt/airflow/helpers
