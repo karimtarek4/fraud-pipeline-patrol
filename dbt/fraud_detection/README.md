@@ -76,7 +76,7 @@ This module is designed following the principles of Kimball's dimensional modeli
 ## 🚦 Integration with the Pipeline
 
 - The marts are exported as Parquet files to S3/MinIO, making them available for the next stage in the pipeline.
-- The Airflow DAGs trigger the DBT models after data upload, and then trigger the scoring DAG to use these marts for fraud detection.
+- The Airflow DAGs trigger the DBT models after data upload, and then trigger the ml scoring DAG to use these marts for fraud detection.
 - This modular, layered approach ensures data quality, traceability, and flexibility for analytics and machine learning.
 
 ---
@@ -89,5 +89,3 @@ This module is designed following the principles of Kimball's dimensional modeli
 - **Historical Analysis:** SCD2 and surrogate keys enable point-in-time and trend analysis, critical for fraud detection.
 
 ---
-
-For more details, see the individual model files in each layer. Happy modeling! 🚀

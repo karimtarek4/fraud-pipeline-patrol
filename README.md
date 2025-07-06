@@ -1,12 +1,9 @@
-
 # 🛡️ Fraud Pipeline Patrol — Modular, Production-Inspired Fraud Detection
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
 ![dbt](https://img.shields.io/badge/dbt-%23FF694B.svg?logo=dbt&logoColor=white)
 ![Airflow](https://img.shields.io/badge/Airflow-2.7.0-blue?logo=apache-airflow)
 ![Docker](https://img.shields.io/badge/Docker-Desktop-blue?logo=docker)
-
-
 
 A modular, end-to-end fraud detection pipeline simulating real-world data workflows using Airflow, dbt, Python, and modern data tools. This project demonstrates advanced analytics engineering, orchestration, and modeling skills—built to impress and inspire!
 
@@ -18,26 +15,27 @@ Build a robust, production-style data pipeline that detects fraudulent financial
 
 - Automated data generation, ingestion, and partitioning
 - Dimensional modeling and transformation with dbt (Kimball methodology)
-- Modular, explainable risk scoring in Python
-- Alerting, notification, and rich visualizations
+- Hybrid rule-based + ML risk scoring in Python
+- Alerting and auto-generated Metabase dashboards
 - Fully dockerized, reproducible development environment
 
 ---
 
 ## 🧱 Tech Stack
 
-| Tool       | Role                                 |
-|------------|--------------------------------------|
-| Airflow    | Pipeline orchestration               |
-| dbt        | Dimensional modeling & transformation|
-| Python     | Scoring logic & alerting             |
-| MinIO      | S3-compatible object storage         |
-| DuckDB     | Fast analytics & Parquet processing  |
-| Postgres   | Analytical storage                   |
-| Matplotlib/Seaborn | Visualization & reporting    |
-| Docker     | Reproducibility & deployment         |
+| Tool              | Role                                       |
+|-------------------|--------------------------------------------|
+| Airflow           | Pipeline orchestration                     |
+| dbt               | Dimensional modeling & transformation      |
+| Python            | Scoring logic & alerting                   |
+| MinIO             | S3-compatible object storage               |
+| DuckDB            | Fast analytics & Parquet processing        |
+| Postgres          | Analytical storage                         |
+| Metabase          | Data visualization and dashboarding        |
+| Docker            | Reproducibility & deployment               |
 
 ---
+
 
 ## 🗂️ Project Structure
 
@@ -56,6 +54,18 @@ fraud-pipeline-patrol/
 
 ---
 
+---
+
+## ⛓️ Orchestration Logic
+
+- Modular Airflow DAGs orchestrate each stage:
+generate_data → upload_to_minio → run_dbt → score_transactions → alert_users → init_metabase
+
+- DAGs are downstream-triggered and composable
+- Resource-safe, testable modules that support local and remote execution
+
+---
+
 ## 🔄 Pipeline Flow
 
 ### 1. **Synthetic Data Generation & Ingestion**
@@ -70,59 +80,75 @@ fraud-pipeline-patrol/
   - **Marts:** Star schema (facts & dimensions) for analytics and scoring
 - Marts are exported as Parquet files for downstream use
 
-### 3. **Scoring (Python)**
-- Reads enriched marts directly from MinIO using DuckDB
-- Applies modular, rule-based scoring logic:
-  - Failed logins, geo mismatch, high-risk merchant/customer, outlier detection, odd hours, etc.
-- Flags risky transactions and writes alerts to both Parquet and Postgres
+### 3. **Scoring (Python + ML)**
 
-### 4. **Alerting & Visualization**
-- Alerts are used to notify users and generate visual reports
-- Visualizations are created using Python libraries (Matplotlib, Seaborn) and saved as images in the `visualizations/` directory
-- Visuals include:
-  - Top 10 risky customers
-  - Most common fraud alert flags
+- Reads enriched marts directly from MinIO using DuckDB  
+- Applies **hybrid fraud detection logic**, combining:
+
+  #### 🔍 Rule-Based Scoring:
+  - Flags suspicious behavior using domain-driven rules:
+    - Failed login attempts
+    - Geo-location mismatch
+    - Night/weekend login patterns
+    - High-risk merchants or customers
+    - Z-score outliers in transaction amount
+  - Produces a `risk_score` and triggers one or more `flags`
+
+  #### 🤖 Machine Learning Scoring:
+  - Trained **Random Forest Classifier** on weak labels from rule-based scores
+  - Uses features like:
+    - `failed_logins_24h`, `geo_mismatch`, `night_login`, `is_high_risk_merchant`, `transaction_amount`
+  - Achieves:
+    - **Accuracy:** 0.99
+    - **Precision:** 0.97
+    - **Recall:** 0.97
+    - **F1 Score:** 0.97
+  PS: Please refer to /scoring/fraud_model_building.ipynb for a walkthrough of how the model was developed. 
+
+- **Scoring Output:**
+  - `fraud_alerts` table containing: `transaction_id`, `risk_score`, `flags`, `ml_score`, `label`
+  - Alerts saved to both **Parquet** and **Postgres**
+
+---
+
+
+### 4. **Visualization (Metabase) Script**
+  - Launches a Metabase instance (if not running)
+  - Initializes Metabase using `initialize_metabase.py`, which:
+    - Skips the welcome wizard
+    - Creates admin account
+    - Adds Postgres DB connection
+    - Imports dashboards/cards from JSON in `metadata/`
+- Metabase dashboards include:
+  - Top risky customers
+  - Most common fraud flags
   - Alerts over time
   - Risk score distribution
-- These help monitor fraud trends and system performance
+- Dashboards are updated on each DAG run via automatic refresh
+
 ---
 
 ## 🚧 Next Steps & Improvements
 
 - Add automated tests for each module (unit, integration, and data quality)
-- Expand scoring logic with machine learning models for adaptive fraud detection
-- Build a simple web dashboard (e.g., Streamlit) for interactive monitoring
-- Parameterize and document environment setup for easier onboarding
+- Build a Streamlit or web-based monitoring UI
 - Add CI/CD for automated deployment and testing
-- Enhance alerting (e.g., real email/SMS notifications)
-- Improve data generation realism (simulate more fraud scenarios)
 
 ---
 
----
-
-## � Orchestration Logic
-
-- Modular Airflow DAGs orchestrate each stage, triggering downstream DAGs upon completion
-- Resource management ensures no conflicts and smooth, sequential execution
-- Each module is independently testable and extensible
-
----
 
 ## 🌟 Why This Project Stands Out
 
 - **Production-inspired:** Mirrors real-world data engineering best practices
 - **Kimball modeling:** Clean, analytics-ready marts for BI and ML
-- **Explainable scoring:** Transparent, auditable fraud detection logic
+- **Hybrid Scoring:** Combines transparent rules with adaptive ML logic
+- **Self-building dashboards:** Metabase is fully automated and initialized via Airflow
 - **Modular & extensible:** Each component can be swapped, scaled, or extended
-- **Beautiful dashboards:** End-to-end visibility from raw data to business insights
 
 ---
 
 ## 👤 Author
 
 **Karim Tarek** — Data & Analytics Engineer  
-_Seeking Staff Analytics Engineering roles_  
 📫 [LinkedIn](https://www.linkedin.com/in/karimtarek)
-
 

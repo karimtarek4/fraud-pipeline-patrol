@@ -1,17 +1,17 @@
 # 🛡️ Fraud Detection Model Development – Rule-Based Labeling + Supervised ML
 
-This project demonstrates how to build a production-inspired fraud detection model by combining rule-based labeling with supervised machine learning. It walks through the full data science pipeline: from behavioral feature engineering, to intuitive label creation, to model training, evaluation, and export.
+This project demonstrates how to build a production-inspired fraud detection model by combining rule-based labeling with supervised machine learning. It walks through the full data science pipeline: from behavioral feature engineering, to label creation, to model training, evaluation, and export.
 
 ---
 
 ## 🧭 Project Objectives
 
-- Enrich transaction data with behavioral and contextual risk signals.
-- Design a transparent, rule-based fraud scoring system.
-- Generate weakly-supervised fraud labels using risk scores.
+- Enrich transaction data with behavioral infered data.
+- Design arule-based fraud scoring system.
+- Generate supervised fraud labels using risk scores.
 - Train a machine learning model to detect fraud using enriched features.
-- Evaluate model performance using industry-relevant metrics.
-- Save the model for integration into a fraud scoring pipeline.
+- Evaluate model performance.
+- Save the model for integration into pipeline.
 
 ---
 
@@ -19,19 +19,13 @@ This project demonstrates how to build a production-inspired fraud detection mod
 
 | Section | Description |
 |--------|-------------|
-| [Feature Engineering](#-feature-engineering) | Add behavioral context to raw transactions |
-| [Rule-Based Scoring & Labeling](#-rule-based-scoring--labeling) | Generate labels using a custom fraud score |
 | [Data Preparation](#-data-preparation) | Encode and split the data |
 | [Model Training & Evaluation](#-model-training--evaluation) | Train model, analyze features, assess performance |
 | [Model Export](#-model-export) | Save trained model for deployment |
-| [Next Steps](#-next-steps--improvements) | Opportunities for future improvement |
 
 ---
 
 ## 🧪 Feature Engineering
-
-### 🔍 Goal:
-Enrich transactions with signals derived from customer login behavior and profile context.
 
 ### ⚙️ Features Created:
 - `failed_logins_24h`: Number of failed logins in the 24h window before a transaction

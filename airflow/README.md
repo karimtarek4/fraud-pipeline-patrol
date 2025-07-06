@@ -72,15 +72,6 @@ The pipeline is composed of several modular DAGs, each responsible for a specifi
   - Connects to the database, fetches customers with fraud alerts, and simulates sending notifications.
   - **Triggers:** `visualize_alert_data_dag` to generate updated visualizations.
 
----
-
-### 6. `visualize_alert_data_dag`
-- **Purpose:** Generates and saves visualizations of fraud alert data for monitoring and reporting.
-- **Logic:**  
-  - Runs a script to create and save charts based on the latest fraud alerts.
-
----
-
 ## ⏳ Orchestration Logic
 
 - **Downstream Triggers:** Each DAG (except the last) triggers the next DAG using Airflow’s `TriggerDagRunOperator`.
@@ -98,31 +89,9 @@ This modular DAG structure:
 
 ---
 
-## 📂 DAGs Directory Structure
-
-```
-airflow/
-  dags/
-    alert_users_dag.py
-    generate_and_partition_data_dag.py
-    run_dbt_dag.py
-    ml_transaction_scoring_dag.py
-    upload_to_minio_dag.py
-    visualize_alert_data_dag.py
-  README.md  ← (You are here!)
-```
-
----
 
 ## 📝 Notes
 
 - All DAGs are designed to run in a Dockerized Airflow environment.
 - Environment variables and script paths are configurable for flexibility.
 - Each DAG is documented in its own file for further details.
-
----
-
-✨ For more details on each stage, see the corresponding DAG file or module README.  
-Happy orchestrating!
-
----
