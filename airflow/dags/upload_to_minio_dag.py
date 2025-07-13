@@ -5,6 +5,7 @@ Uploads parttioned data to MinIO while maintaining the directory structure.
 
 from airflow.decorators import dag
 from airflow.operators.bash import BashOperator
+from airflow.models import Variable
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -47,11 +48,13 @@ default_args = {
 )
 def upload_to_minio_dag():
 
-    UPLOAD_SCRIPT_PATH = os.getenv('UPLOAD_SCRIPT_PATH', '/opt/airflow/scripts/upload_fraud_data_to_minio.py')
+    # Use Variable instead of environment variable for operational flexibility
+    UPLOAD_SCRIPT_PATH = Variable.get('upload_script_path', default_var='/opt/airflow/scripts/upload_fraud_data_to_minio.py')
+    
     upload_partitioned_data_to_minio_task = BashOperator(
         task_id='upload_partitioned_data_to_minio_task',
         bash_command=f'cd /opt/airflow && python {UPLOAD_SCRIPT_PATH}',
-        outlets=[minio_fraud_stg_data_dataset],  # Now with actual endpoint info
+        outlets=[minio_fraud_stg_data_dataset],
     )
 
     upload_partitioned_data_to_minio_task

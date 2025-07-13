@@ -1,4 +1,5 @@
 from airflow.decorators import dag, task
+from airflow.models import Variable
 from datetime import datetime, timedelta
 import subprocess
 import os
@@ -33,10 +34,11 @@ default_args = {
 @task()
 def run_score_transactions_task():
     """
-    Runs the score_transactions.py script.
+    Runs the score_transactions.py script using configurable path from Variables.
     """
-    # Load environment variables from .env file
-    SCRIPT_PATH = os.getenv('SCORE_TRANSACTIONS_SCRIPT_PATH', '/opt/airflow/scoring/scripts/score_transactions.py')
+    # Use Variable instead of environment variable for operational flexibility
+    SCRIPT_PATH = Variable.get('scoring_script_path', default_var='/opt/airflow/scoring/scripts/score_transactions.py')
+    
     result = subprocess.run(['python', SCRIPT_PATH], capture_output=True, text=True)
     if result.stdout:
         print(f"Script output:\n{result.stdout}")
