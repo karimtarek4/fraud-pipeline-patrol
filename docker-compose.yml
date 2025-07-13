@@ -1,6 +1,26 @@
   # ...existing code...
 services:
   
+  # Initialize Airflow variables
+  airflow-init-variables:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airflow-init-variables
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    volumes:
+      - ./airflow:/opt/airflow
+    command: >
+      bash -c "
+        airflow db init &&
+        airflow variables import /opt/airflow/variables.json || echo 'Variables already exist or import failed' &&
+        echo 'Variables initialization complete!'
+      "
+    depends_on:
+      - postgres
+    restart: "no"
+  
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -33,6 +53,7 @@ services:
     container_name: airflow
     depends_on:
       - minio
+      - airflow-init-variables
     ports:
       - "8080:8080"
     env_file:
