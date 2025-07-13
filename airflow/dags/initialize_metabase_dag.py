@@ -16,7 +16,7 @@ default_args = {
 @dag(
     default_args=default_args,
     description='Run the initialize_metabase.py script to set up Metabase',
-    schedule_interval=None,
+    schedule=None,
     catchup=False,
     is_paused_upon_creation=False,
 )

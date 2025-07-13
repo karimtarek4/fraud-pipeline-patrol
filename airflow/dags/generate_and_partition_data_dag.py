@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Get configuration from Airflow Variables
-schedule_interval = Variable.get("fraud_data_generation_schedule", default_var="*/1 * * * *")
+schedule = Variable.get("fraud_data_generation_schedule", default_var="*/1 * * * *")
 enable_concurrency_check = Variable.get("enable_dag_concurrency_check", default_var="true")
 wait_seconds = int(Variable.get("dag_concurrency_wait_seconds", default_var="10"))
 airflow_home = Variable.get("airflow_home_path", default_var="/opt/airflow")
@@ -32,7 +32,7 @@ default_args = {
 }
 
 @dag(
-    schedule_interval=schedule_interval,  # Now configurable via Variables!
+    schedule=schedule,  # Now configurable via Variables!
     start_date=datetime(2023, 1, 1),
     catchup=False,
     max_active_runs=1,
