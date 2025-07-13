@@ -9,6 +9,7 @@ from airflow.models import DagRun
 from airflow.utils.state import State
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.datasets import Dataset
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -53,18 +54,20 @@ def generate_and_partition_data_dag():
         trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
     )
 
+    # Define datasets for each partitioned table
+    customers_dataset = Dataset("file:///opt/airflow/data/processed/customers/")
+    merchants_dataset = Dataset("file:///opt/airflow/data/processed/merchants/")
+    transactions_dataset = Dataset("file:///opt/airflow/data/processed/transactions/")
+    login_attempts_dataset = Dataset("file:///opt/airflow/data/processed/login_attempts/")
+
     partition_data_task = BashOperator(
         task_id='partition_data_task',
         bash_command='cd /opt/airflow && python /opt/airflow/scripts/partition_data_with_duckdb.py',
-    )
-
-    trigger_run_upload_to_minio_dag_task = TriggerDagRunOperator(
-        task_id='trigger_run_upload_to_minio_dag_task',
-        trigger_dag_id='upload_to_minio_dag',
+        outlets=[customers_dataset, merchants_dataset, transactions_dataset, login_attempts_dataset]
     )
 
     # DAG dependencies
     wait_for_other_dags() >> [generate_data_task]
-    generate_data_task >> partition_data_task >> trigger_run_upload_to_minio_dag_task
+    generate_data_task >> partition_data_task
 
 dag = generate_and_partition_data_dag()

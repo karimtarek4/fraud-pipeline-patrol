@@ -6,6 +6,9 @@ import os
 sys.path.append('/opt/airflow')
 from helpers.postgres import get_postgres_conn
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.datasets import Dataset
+
+
 
 
 # Default arguments for the DAG
@@ -16,6 +19,14 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=1),
 }
+
+# Use actual PostgreSQL endpoint for output data
+postgres_host = os.environ.get('ACTUALDATA_POSTGRES_HOST', 'actualdata-postgres')
+postgres_port = os.environ.get('ACTUALDATA_POSTGRES_PORT', '5432')
+postgres_db = os.environ.get('ACTUALDATA_POSTGRES_DB', 'actualdata')
+fraud_alerts_dataset = Dataset(f"postgresql://{postgres_host}:{postgres_port}/{postgres_db}/public/fraud_alerts")
+
+
 
 @task()
 def alert_customers_task():
@@ -39,7 +50,7 @@ def alert_customers_task():
     description='Print number of records in fraud_alerts table in Postgres',
     catchup=False,
     is_paused_upon_creation=False,
-    schedule_interval=None,
+    schedule=[fraud_alerts_dataset],
     max_active_runs=1,
 )
 def alert_users_dag():
