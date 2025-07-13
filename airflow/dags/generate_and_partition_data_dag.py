@@ -1,6 +1,7 @@
 from airflow.decorators import dag, branch_task
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
+from airflow.models import Variable
 from datetime import datetime, timedelta
 import logging
 import time
@@ -9,10 +10,17 @@ from airflow.models import DagRun
 from airflow.utils.state import State
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.datasets import Dataset
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Get configuration from Airflow Variables
+schedule_interval = Variable.get("fraud_data_generation_schedule", default_var="*/1 * * * *")
+enable_concurrency_check = Variable.get("enable_dag_concurrency_check", default_var="true")
+wait_seconds = int(Variable.get("dag_concurrency_wait_seconds", default_var="10"))
+airflow_home = Variable.get("airflow_home_path", default_var="/opt/airflow")
 
 # Default DAG arguments
 default_args = {
@@ -24,18 +32,23 @@ default_args = {
 }
 
 @dag(
-    schedule_interval='*/1 * * * *',
+    schedule_interval=schedule_interval,  # Now configurable via Variables!
     start_date=datetime(2023, 1, 1),
     catchup=False,
     max_active_runs=1,
     default_args=default_args,
-    description='Generate fake transaction data every 1 minute',
+    description='Generate fake transaction data - schedule configurable via Variables',
     is_paused_upon_creation=False,
 )
 def generate_and_partition_data_dag():
 
     @branch_task()
     def wait_for_other_dags(**context):
+        # Check if concurrency control is enabled
+        if enable_concurrency_check != "true":
+            logger.info("DAG concurrency check disabled via Variables")
+            return 'generate_data_task'
+            
         while True:
             with create_session() as session:
                 running = session.query(DagRun).filter(
@@ -44,27 +57,29 @@ def generate_and_partition_data_dag():
                 ).count()
             if running == 0:
                 return 'generate_data_task'
-            print("Other DAGs are still running, waiting...")
-            time.sleep(10)
+            logger.info(f"Other DAGs are still running, waiting {wait_seconds} seconds...")
+            time.sleep(wait_seconds)  # Configurable wait time
 
     generate_data_task = BashOperator(
         task_id='generate_data_task',
-        bash_command='cd /opt/airflow && python /opt/airflow/scripts/generate_synthetic_fraud_data.py',
+        bash_command=f'cd {airflow_home} && python {airflow_home}/scripts/generate_synthetic_fraud_data.py',
         trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
     )
 
+    # Define datasets for each partitioned table
+    customers_dataset = Dataset(f"file://{airflow_home}/data/processed/customers/")
+    merchants_dataset = Dataset(f"file://{airflow_home}/data/processed/merchants/")
+    transactions_dataset = Dataset(f"file://{airflow_home}/data/processed/transactions/")
+    login_attempts_dataset = Dataset(f"file://{airflow_home}/data/processed/login_attempts/")
+
     partition_data_task = BashOperator(
         task_id='partition_data_task',
-        bash_command='cd /opt/airflow && python /opt/airflow/scripts/partition_data_with_duckdb.py',
-    )
-
-    trigger_run_upload_to_minio_dag_task = TriggerDagRunOperator(
-        task_id='trigger_run_upload_to_minio_dag_task',
-        trigger_dag_id='upload_to_minio_dag',
+        bash_command=f'cd {airflow_home} && python {airflow_home}/scripts/partition_data_with_duckdb.py',
+        outlets=[customers_dataset, merchants_dataset, transactions_dataset, login_attempts_dataset]
     )
 
     # DAG dependencies
     wait_for_other_dags() >> [generate_data_task]
-    generate_data_task >> partition_data_task >> trigger_run_upload_to_minio_dag_task
+    generate_data_task >> partition_data_task
 
 dag = generate_and_partition_data_dag()

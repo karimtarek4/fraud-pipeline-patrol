@@ -1,0 +1,16 @@
+{
+  "_comment_pipeline_control": "Core pipeline operational settings",
+  "fraud_data_generation_schedule": "*/1 * * * *",
+  "enable_dag_concurrency_check": "true",
+  "dag_concurrency_wait_seconds": "15",
+  "airflow_home_path": "/opt/airflow",
+  
+  "_comment_feature_flags": "Enable/disable pipeline components",
+  "enable_metabase_trigger": "false",
+  "enable_alert_notifications": "true",
+  
+  "_comment_script_paths": "Configurable script locations for operational flexibility",
+  "scoring_script_path": "/opt/airflow/scoring/scripts/score_transactions.py",
+  "upload_script_path": "/opt/airflow/scripts/upload_fraud_data_to_minio.py",
+  "metabase_script_path": "/opt/airflow/metabase/scripts/initialize_metabase.py"
+}
