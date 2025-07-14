@@ -5,10 +5,18 @@ from datetime import datetime, timedelta
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 import os
 from dotenv import load_dotenv
+from airflow.datasets import Dataset
+
 
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../.env'))
+
+# Use actual MinIO endpoint path
+minio_endpoint = os.environ.get('MINIO_ENDPOINT', 'minio:9000')
+minio_fraud_stg_data_dataset = Dataset(f"s3://{minio_endpoint}/fraud-data-processed/")
+minio_fraud_mart_data_dataset = Dataset(f"s3://{minio_endpoint}/fraud-data-processed/marts/")
+
 
 # Default arguments for the DAG
 default_args = {
@@ -24,7 +32,7 @@ default_args = {
     description='Run DBT models after data is uploaded to MinIO',
     catchup=False,
     is_paused_upon_creation=False,
-    schedule_interval=None,
+    schedule=[minio_fraud_stg_data_dataset],
     max_active_runs=1,
 )
 def run_dbt_dag():
@@ -56,13 +64,9 @@ def run_dbt_dag():
             'MINIO_ROOT_USER': MINIO_ROOT_USER,
             'MINIO_ROOT_PASSWORD': MINIO_ROOT_PASSWORD,
         },
+        outlets=[minio_fraud_mart_data_dataset],  # Output dataset for DBT models
     )
 
-    trigger_ml_transaction_scoring_dag_task = TriggerDagRunOperator(
-        task_id='trigger_ml_transaction_scoring_dag_task',
-        trigger_dag_id='ml_transaction_scoring_dag',
-    )
-
-    install_dbt_deps_task >> run_dbt_task >> trigger_ml_transaction_scoring_dag_task
+    install_dbt_deps_task >> run_dbt_task 
 
 dag = run_dbt_dag()

@@ -85,7 +85,6 @@ docker-compose.*.yml
 # --------------------
 *.csv
 *.parquet
-*.json
 *.xlsx
 data/raw/
 data/interim/

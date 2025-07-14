@@ -37,24 +37,9 @@ Build a robust, production-style data pipeline that detects fraudulent financial
 ---
 
 
-## 🗂️ Project Structure
+## 🧭 Architecture Diagram
 
-```
-fraud-pipeline-patrol/
-│
-├── airflow/      # Airflow DAGs & orchestration
-├── dbt/          # dbt project (core, landing, staging, marts)
-├── scoring/      # Python scoring logic
-├── data/         # Raw, processed, and results data
-├── docker/       # Dockerfiles and compose
-├── visualizations/ # Python-generated charts
-├── notebooks/    # Optional EDA
-└── README.md     # This file
-```
-
----
-
----
+![Architecture](assets/architecture_diagram.png)
 
 ## ⛓️ Orchestration Logic
 
