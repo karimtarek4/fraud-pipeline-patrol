@@ -25,7 +25,7 @@ Build a robust, production-style data pipeline that detects fraudulent financial
 
 | Tool              | Role                                       |
 |-------------------|--------------------------------------------|
-| Airflow           | Pipeline orchestration                     |
+| Airflow           | Pipeline orchestration with Datasets & Variables |
 | dbt               | Dimensional modeling & transformation      |
 | Python            | Scoring logic & alerting                   |
 | MinIO             | S3-compatible object storage               |
@@ -41,12 +41,35 @@ Build a robust, production-style data pipeline that detects fraudulent financial
 
 ![Architecture](assets/architecture_diagram.png)
 
+## 🧪 Testing & Quality Assurance
+
+This project includes a comprehensive test suite with **44 tests** across multiple categories to ensure pipeline reliability and correctness:
+
+| Test Category | Files | Tests | Coverage |
+|---------------|-------|-------|----------|
+| **Unit Tests** | 2 | 6 | Database connections & helpers |
+| **Script Tests** | 1 | 7 | Data generation & file operations |
+| **DAG Tests** | 2 | 31 | Airflow pipeline validation |
+
+### Key Testing Features:
+- **Automated Test Runner**: `python run_all_tests.py` - detects environments and runs all tests
+- **Environment Detection**: Automatically finds the correct pytest with Airflow support
+- **Comprehensive Coverage**: Tests database connections, data generation logic, and complete DAG pipeline validation
+- **CI/CD Ready**: Proper exit codes and reporting for continuous integration
+
+### Quick Test Commands:
+```bash
+# Run all tests with automatic environment detection
+python run_all_tests.py
+```
+
 ## ⛓️ Orchestration Logic
 
 - Modular Airflow DAGs orchestrate each stage:
 generate_data → upload_to_minio → run_dbt → score_transactions → alert_users → init_metabase
 
-- DAGs are downstream-triggered and composable
+- **Data-Driven Triggering**: Uses Airflow Datasets to automatically trigger downstream DAGs when data is ready (file://, s3://, postgresql:// datasets)
+- **Runtime Configuration**: Airflow Variables enable operational flexibility - toggle features (alerts, Metabase), adjust scheduling, and modify script paths without code changes
 - Resource-safe, testable modules that support local and remote execution
 
 ---
@@ -115,9 +138,7 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
 
 ## 🚧 Next Steps & Improvements
 
-- Add automated tests for each module (unit, integration, and data quality)
 - Build a Streamlit or web-based monitoring UI
-- Add CI/CD for automated deployment and testing
 
 ---
 
@@ -125,6 +146,8 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
 ## 🌟 Why This Project Stands Out
 
 - **Production-inspired:** Mirrors real-world data engineering best practices
+- **Data-Driven Architecture:** Airflow Datasets ensure reliable, event-driven pipeline execution
+- **Operational Excellence:** Variables provide zero-downtime configuration and feature toggles
 - **Kimball modeling:** Clean, analytics-ready marts for BI and ML
 - **Hybrid Scoring:** Combines transparent rules with adaptive ML logic
 - **Self-building dashboards:** Metabase is fully automated and initialized via Airflow
