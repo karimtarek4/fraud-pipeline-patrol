@@ -90,10 +90,59 @@ def get_or_create_session_token():
             logger.error(f"❌ Login failed after admin creation. {e2}")
             return None
 
+def get_existing_databases(session_id):
+    """Get all existing database names from Metabase."""
+    resp = requests.get(f"{METABASE_URL}/api/database", headers={"X-Metabase-Session": session_id})
+    resp.raise_for_status()
+    response_data = resp.json()
+    # Handle both list response and object with data property
+    if isinstance(response_data, list):
+        databases = response_data
+    else:
+        databases = response_data.get("data", [])
+    db_names = [db.get("name") for db in databases if db.get("name")]
+    logger.info(f"Found {len(db_names)} existing databases: {db_names}")
+    return db_names
+
+def get_existing_cards(session_id):
+    """Get all existing card names from Metabase."""
+    resp = requests.get(f"{METABASE_URL}/api/card", headers={"X-Metabase-Session": session_id})
+    resp.raise_for_status()
+    response_data = resp.json()
+    # Handle both list response and object with data property
+    if isinstance(response_data, list):
+        cards = response_data
+    else:
+        cards = response_data.get("data", [])
+    card_names = [card.get("name") for card in cards if card.get("name")]
+    logger.info(f"Found {len(card_names)} existing cards: {card_names}")
+    return card_names
+
+def get_existing_dashboards(session_id):
+    """Get all existing dashboard names from Metabase."""
+    resp = requests.get(f"{METABASE_URL}/api/dashboard", headers={"X-Metabase-Session": session_id})
+    resp.raise_for_status()
+    response_data = resp.json()
+    # Handle both list response and object with data property
+    if isinstance(response_data, list):
+        dashboards = response_data
+    else:
+        dashboards = response_data.get("data", [])
+    dashboard_names = [dash.get("name") for dash in dashboards if dash.get("name")]
+    logger.info(f"Found {len(dashboard_names)} existing dashboards: {dashboard_names}")
+    return dashboard_names
+
 def add_actualdata_postgres(session_id):
-    """Add the Actual Data Postgres database to Metabase."""
+    """Add the Actual Data Postgres database to Metabase if it doesn't already exist."""
+    existing_databases = get_existing_databases(session_id)
+    db_name = "MainDB"
+    
+    if db_name in existing_databases:
+        logger.info(f"🗄️ Database '{db_name}' already exists. Skipping creation.")
+        return
+    
     db_payload = {
-        "name": "MainDB",
+        "name": db_name,
         "engine": "postgres",
         "details": {
             "host": "actualdata-postgres",
@@ -109,31 +158,61 @@ def add_actualdata_postgres(session_id):
     }
     resp = requests.post(f"http://{MB_HOSTNAME}:{MB_PORT}/api/database", headers={"X-Metabase-Session": session_id}, json=db_payload)
     resp.raise_for_status()
-    logger.info("🗄️ Added MainDB database to Metabase.")
+    logger.info(f"🗄️ Added '{db_name}' database to Metabase.")
 
 def create_cards(session_id):
-    """Create all cards from the hardcoded JSON file."""
+    """Create all cards from the hardcoded JSON file, skipping duplicates."""
+    existing_cards = get_existing_cards(session_id)
+    
     with open(CARDS_FILE) as f:
         cards = json.load(f)
-    logger.info(f"Found {len(cards)} cards in {CARDS_FILE}. Cloning...")
+    logger.info(f"Found {len(cards)} cards in {CARDS_FILE}. Checking for duplicates...")
+    
+    created_count = 0
+    skipped_count = 0
+    
     for card in cards:
+        card_name = card.get("name")
+        if card_name in existing_cards:
+            logger.info(f"📊 Card '{card_name}' already exists. Skipping.")
+            skipped_count += 1
+            continue
+            
         resp = requests.post(f"{METABASE_URL}/api/card", headers={"X-Metabase-Session": session_id}, json=card)
         if resp.status_code == 200:
-            logger.info(f"Created: {card['name']}")
+            logger.info(f"📊 Created card: {card_name}")
+            created_count += 1
         else:
-            logger.error(f"Failed to Create: {card['name']} | Status: {resp.status_code} | {resp.text}")
+            logger.error(f"❌ Failed to create card: {card_name} | Status: {resp.status_code} | {resp.text}")
+    
+    logger.info(f"📊 Cards summary: {created_count} created, {skipped_count} skipped (already exist)")
 
 def create_dashboards(session_id):
-    """Create all dashboards from the hardcoded JSON file."""
+    """Create all dashboards from the hardcoded JSON file, skipping duplicates."""
+    existing_dashboards = get_existing_dashboards(session_id)
+    
     with open(DASHBOARDS_FILE) as f:
         dashboards = json.load(f)
-    logger.info(f"Found {len(dashboards)} dashboards in {DASHBOARDS_FILE}. Cloning...")
+    logger.info(f"Found {len(dashboards)} dashboards in {DASHBOARDS_FILE}. Checking for duplicates...")
+    
+    created_count = 0
+    skipped_count = 0
+    
     for dash in dashboards:
+        dashboard_name = dash.get("name")
+        if dashboard_name in existing_dashboards:
+            logger.info(f"📈 Dashboard '{dashboard_name}' already exists. Skipping.")
+            skipped_count += 1
+            continue
+            
         resp = requests.post(f"{METABASE_URL}/api/dashboard", headers={"X-Metabase-Session": session_id}, json=dash)
         if resp.status_code == 200:
-            logger.info(f"Created dashboard: {dash['name']}")
+            logger.info(f"📈 Created dashboard: {dashboard_name}")
+            created_count += 1
         else:
-            logger.error(f"Failed to Create dashboard: {dash['name']} | Status: {resp.status_code} | {resp.text}")
+            logger.error(f"❌ Failed to create dashboard: {dashboard_name} | Status: {resp.status_code} | {resp.text}")
+    
+    logger.info(f"📈 Dashboards summary: {created_count} created, {skipped_count} skipped (already exist)")
 
 def main():
     logger.info("--- Metabase Initialization Script Start ---")
