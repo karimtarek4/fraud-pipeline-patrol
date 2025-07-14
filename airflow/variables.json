@@ -6,7 +6,7 @@
   "airflow_home_path": "/opt/airflow",
   
   "_comment_feature_flags": "Enable/disable pipeline components",
-  "enable_metabase_trigger": "false",
+  "enable_metabase_trigger": "true",
   "enable_alert_notifications": "true",
   
   "_comment_script_paths": "Configurable script locations for operational flexibility",

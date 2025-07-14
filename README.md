@@ -70,6 +70,7 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
 
 - **Data-Driven Triggering**: Uses Airflow Datasets to automatically trigger downstream DAGs when data is ready (file://, s3://, postgresql:// datasets)
 - **Runtime Configuration**: Airflow Variables enable operational flexibility - toggle features (alerts, Metabase), adjust scheduling, and modify script paths without code changes
+- **Smart Branching Logic**: Implements conditional workflows using BranchPythonOperator for feature toggles and concurrency control
 - Resource-safe, testable modules that support local and remote execution
 
 ---
@@ -148,6 +149,7 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
 - **Production-inspired:** Mirrors real-world data engineering best practices
 - **Data-Driven Architecture:** Airflow Datasets ensure reliable, event-driven pipeline execution
 - **Operational Excellence:** Variables provide zero-downtime configuration and feature toggles
+- **Intelligent Branching:** Dynamic workflow paths based on runtime conditions and feature flags
 - **Kimball modeling:** Clean, analytics-ready marts for BI and ML
 - **Hybrid Scoring:** Combines transparent rules with adaptive ML logic
 - **Self-building dashboards:** Metabase is fully automated and initialized via Airflow

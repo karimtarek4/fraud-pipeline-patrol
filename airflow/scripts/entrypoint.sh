@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-airflow db init
+# Don't run db init here since airflow-init-variables already handles it
+# airflow db init
 
 # Create admin user if it doesn't exist
 airflow users create \

@@ -7,7 +7,7 @@ import os
 import sys
 import os
 sys.path.append('/opt/airflow')
-from helpers.postgres import get_postgres_conn
+from helpers.actualdata_postgres import get_actualdata_postgres_conn
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.datasets import Dataset
 
@@ -44,7 +44,7 @@ def alert_customers_task():
         return "Alerts disabled"
     
     try:
-        conn = get_postgres_conn()
+        conn = get_actualdata_postgres_conn()
         with conn.cursor() as cur:
             cur.execute('SELECT customer_id FROM fraud_alerts;')
             customer_ids = cur.fetchall()
