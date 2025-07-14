@@ -1,3 +1,4 @@
+
 """
 Integration tests for Airflow DAG dataset-based triggering.
 
@@ -35,16 +36,7 @@ class TestDAGDatasetIntegration:
     def test_all_dags_exist_and_loadable(self, dagbag):
         """
         Test that all expected DAGs exist and can be loaded without errors.
-        
-        What this test does (simple):
-        - Checks that all pipeline DAGs exist in the DagBag
-        - Verifies there are no import errors
-        - Ensures DAGs are properly configured
-        
-        Developer Notes:
-        - Basic smoke test for DAG availability
-        - Validates that all DAGs can be imported successfully
-        - Catches syntax errors or missing dependencies early
+
         """
         # Expected DAGs in the fraud detection pipeline
         expected_dag_ids = [
@@ -62,16 +54,7 @@ class TestDAGDatasetIntegration:
     def test_generate_and_partition_dag_structure(self, dagbag):
         """
         Test the structure of generate_and_partition_data_dag.
-        
-        What this test does (simple):
-        - Gets the generate_and_partition_data_dag
-        - Checks that it has the expected tasks
-        - Verifies basic DAG properties
-        
-        Developer Notes:
-        - Tests DAG structure without database dependency
-        - Validates task existence and basic configuration
-        - Ensures DAG is properly constructed
+
         """
         dag = dagbag.dags.get("generate_and_partition_data_dag")
         assert dag is not None, "generate_and_partition_data_dag should exist"
@@ -91,16 +74,7 @@ class TestDAGDatasetIntegration:
     def test_upload_to_minio_dag_structure(self, dagbag):
         """
         Test the structure of upload_to_minio_dag.
-        
-        What this test does (simple):
-        - Gets the upload_to_minio_dag
-        - Checks that it has the expected tasks
-        - Verifies basic DAG properties
-        
-        Developer Notes:
-        - Tests DAG structure without database dependency
-        - Validates task existence and basic configuration
-        - Ensures DAG is properly constructed
+
         """
         dag = dagbag.dags.get("upload_to_minio_dag")
         assert dag is not None, "upload_to_minio_dag should exist"
@@ -120,16 +94,7 @@ class TestDAGDatasetIntegration:
     def test_run_dbt_dag_structure(self, dagbag):
         """
         Test the structure of run_dbt_dag.
-        
-        What this test does (simple):
-        - Gets the run_dbt_dag
-        - Checks that it has the expected DBT tasks
-        - Verifies basic DAG properties
-        
-        Developer Notes:
-        - Tests DBT DAG structure without database dependency
-        - Validates DBT task existence and basic configuration
-        - Ensures DBT DAG is properly constructed
+
         """
         dag = dagbag.dags.get("run_dbt_dag")
         assert dag is not None, "run_dbt_dag should exist"
@@ -150,15 +115,6 @@ class TestDAGDatasetIntegration:
         """
         Test the structure of ml_transaction_scoring_dag.
         
-        What this test does (simple):
-        - Gets the ml_transaction_scoring_dag
-        - Checks that it has the expected scoring tasks
-        - Verifies basic DAG properties
-        
-        Developer Notes:
-        - Tests ML scoring DAG structure without database dependency
-        - Validates scoring task existence and basic configuration
-        - Ensures ML DAG is properly constructed
         """
         dag = dagbag.dags.get("ml_transaction_scoring_dag")
         assert dag is not None, "ml_transaction_scoring_dag should exist"
@@ -178,17 +134,7 @@ class TestDAGDatasetIntegration:
     def test_dataset_configuration(self, dagbag):
         """
         Test dataset configuration across the complete fraud detection pipeline.
-
-        What this test does (comprehensive):
-        - Validates all 4 pipeline DAGs exist and are properly configured
-        - Tests dataset scheduling for each DAG in the pipeline
-        - Verifies dataset outlets (what each DAG produces)
-        - Checks the complete data flow from generation to fraud alerts
-
-        Developer Notes:
-        - Tests the complete pipeline dataset workflow
-        - Validates dataset-driven DAG triggering across all stages
-        - Ensures proper dataset URI configuration throughout pipeline
+        
         """
         # Define the complete pipeline DAGs
         pipeline_dags = {

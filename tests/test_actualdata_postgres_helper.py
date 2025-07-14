@@ -21,8 +21,7 @@ from helpers.actualdata_postgres import get_actualdata_postgres_conn
 def mock_env_vars():
     """
     Fixture to safely manage environment variables during testing.
-    - Saves current environment variables before each test
-    - Restores them after each test finishes
+    
     """
     original_env = os.environ.copy()
     yield
@@ -63,8 +62,6 @@ def test_get_actualdata_postgres_conn_default_params(mock_env_vars):
 def test_get_actualdata_postgres_conn_custom_params(mock_env_vars):
     """
     Test get_actualdata_postgres_conn with custom environment variables.
-    - Sets custom database connection settings using environment variables
-    - Checks that it uses custom settings instead of defaults
     """
     os.environ["ACTUALDATA_POSTGRES_HOST"] = "custom-host"
     os.environ["ACTUALDATA_POSTGRES_PORT"] = "5439"
@@ -90,8 +87,8 @@ def test_get_actualdata_postgres_conn_custom_params(mock_env_vars):
 def test_get_actualdata_postgres_conn_connection_error():
     """
     Test that connection errors are properly propagated.
-    - Simulates a connection error and checks that it is raised
-    """
+
+        """
     with patch('psycopg2.connect') as mock_connect:
         mock_connect.side_effect = Exception("Test connection error")
 

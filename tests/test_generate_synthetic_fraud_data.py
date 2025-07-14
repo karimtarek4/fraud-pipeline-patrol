@@ -41,14 +41,7 @@ class TestDataGenerationLogic:
     def test_generate_customers_record_count(self):
         """
         Test that generate_customers creates the expected number of records.
-        
-        What this test does (simple):
-        - Calls generate_customers with specific parameters
-        - Checks that the returned DataFrame has the right number of rows
-        
-        Developer Notes:
-        - Tests the most basic requirement: correct record count
-        - Uses parametrized values to ensure function respects input parameters
+
         """
         # Test with default parameters
         customers = generate_customers(start_id=1001, num_customers=100)
@@ -109,15 +102,7 @@ class TestDataGenerationLogic:
     def test_generate_merchants_logic(self):
         """
         Test merchant generation logic and risk score mapping.
-        
-        What this test does (simple):
-        - Generates merchant data
-        - Validates that risk scores match categories correctly
-        
-        Developer Notes:
-        - Tests the business logic for merchant risk assessment
-        - Ensures category-to-risk mapping is applied correctly
-        - Validates data consistency between related fields
+
         """
         merchants = generate_merchants(start_id=3000, num_merchants=20)
         
@@ -144,16 +129,7 @@ class TestDataGenerationLogic:
     def test_generate_transactions_customer_relationship(self):
         """
         Test that transactions are properly linked to customers and respect customer baselines.
-        
-        What this test does (simple):
-        - Creates sample customers and merchants
-        - Generates transactions for them
-        - Validates that transaction amounts are around customer baselines
-        
-        Developer Notes:
-        - Tests the relationship between customers and their transactions
-        - Validates that transaction amounts respect customer behavioral patterns
-        - Ensures foreign key relationships are maintained
+
         """
         # Create small test datasets
         customers = generate_customers(start_id=1000, num_customers=3)
@@ -176,15 +152,7 @@ class TestFileOperations:
     def test_ensure_dirs_creation(self, mock_makedirs):
         """
         Test that ensure_dirs creates directories correctly.
-        
-        What this test does (simple):
-        - Calls ensure_dirs with test directory paths
-        - Verifies that os.makedirs is called for each directory
-        
-        Developer Notes:
-        - Uses @patch to mock os.makedirs and avoid actual directory creation
-        - Tests that the function calls the OS correctly for directory creation
-        - Verifies exist_ok=True is passed (important for idempotency)
+    
         """
         test_dirs = ["/test/dir1", "/test/dir2", "/test/dir3"]
         ensure_dirs(test_dirs)
@@ -202,16 +170,6 @@ class TestFileOperations:
         """
         Test that main() writes all expected files to correct paths.
         
-        What this test does (simple):
-        - Mocks the file system and pandas operations
-        - Calls the main() function
-        - Verifies that files are written to expected locations
-        
-        Developer Notes:
-        - Uses multiple patches to mock file system operations
-        - Tests the integration of all data generation functions
-        - Validates that all 4 expected files (customers, merchants, transactions, login_attempts) are written
-        - Checks that file paths are constructed correctly
         """
         # Mock the path resolution to return a known test path
         mock_path = MagicMock()
@@ -248,15 +206,6 @@ class TestDataIntegrity:
         """
         Test that generated data maintains referential integrity.
         
-        What this test does (simple):
-        - Generates a complete dataset (customers, merchants, transactions, login_attempts)
-        - Validates that foreign key relationships are maintained
-        - Checks that data types are consistent across related tables
-        
-        Developer Notes:
-        - Integration test that validates the entire data generation pipeline
-        - Ensures that the generated data could be successfully loaded into a relational database
-        - Tests data quality from an end-to-end perspective
         """
         # Generate complete dataset
         customers = generate_customers(start_id=1000, num_customers=5)

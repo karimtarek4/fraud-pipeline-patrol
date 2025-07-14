@@ -21,16 +21,7 @@ from helpers.postgres import get_postgres_conn
 def mock_env_vars():
     """
     Fixture to safely manage environment variables during testing.
-    
-    What it does (simple):
-    - Saves current environment variables before each test
-    - Restores them after each test finishes
-    - This prevents tests from affecting each other
-    
-    Developer Notes:
-    - Uses copy() to create a snapshot of current env vars
-    - yield allows test to run, then cleanup code executes
-    - Ensures test isolation by restoring original state
+
     """
     original_env = os.environ.copy()  # Save current environment
     yield  # Let the test run
@@ -41,17 +32,7 @@ def mock_env_vars():
 def test_get_postgres_conn_default_params(mock_env_vars):
     """
     Test get_postgres_conn with default parameters.
-    
-    What this test does (simple):
-    - Calls the postgres connection function without any custom settings
-    - Checks that it tries to connect with the expected default values
-    - Makes sure it returns a connection object
-    
-    Developer Notes:
-    - Uses @patch to mock psycopg2.connect, preventing real DB connections
-    - MagicMock creates a fake connection object for testing
-    - assert_called_once_with() verifies the function was called with exact parameters
-    - Tests the "happy path" scenario with default configuration
+
     """
     with patch('psycopg2.connect') as mock_connect:
         # Create a fake connection object that our mock will return
@@ -66,11 +47,11 @@ def test_get_postgres_conn_default_params(mock_env_vars):
         # Verify psycopg2.connect was called with the expected default parameters
         # These should match the defaults defined in helpers/postgres.py
         mock_connect.assert_called_once_with(
-            host="postgres",        # Default PostgreSQL host (from actual implementation)
-            port="5432",           # Default PostgreSQL port
-            user="airflow",        # Default username
-            password="airflow",    # Default password
-            dbname="airflow"       # Default database name (psycopg2 uses 'dbname', not 'database')
+            host="postgres",        
+            port="5432",           
+            user="airflow",        
+            password="airflow",    
+            dbname="airflow"       
         )
         
         # Make sure our function returns the mocked connection
@@ -79,17 +60,7 @@ def test_get_postgres_conn_default_params(mock_env_vars):
 def test_get_postgres_conn_custom_params(mock_env_vars):
     """
     Test get_postgres_conn with custom environment variables.
-    
-    What this test does (simple):
-    - Sets custom database connection settings using environment variables
-    - Calls the postgres connection function
-    - Checks that it uses our custom settings instead of defaults
-    
-    Developer Notes:
-    - Simulates a production environment where DB settings come from env vars
-    - Tests that the function correctly reads from os.environ
-    - Verifies all custom parameters are passed through to psycopg2.connect
-    - Uses mock_env_vars fixture to ensure cleanup after test
+
     """
     # Set custom environment variables to test different connection parameters
     os.environ["POSTGRES_HOST"] = "test-host"       # Custom database server
@@ -109,11 +80,11 @@ def test_get_postgres_conn_custom_params(mock_env_vars):
         # Verify psycopg2.connect was called with our custom parameters
         # (not the defaults from the previous test)
         mock_connect.assert_called_once_with(
-            host="test-host",        # Should use our custom host
-            port="5433",            # Should use our custom port
-            user="test-user",       # Should use our custom user
-            password="test-password", # Should use our custom password
-            dbname="test-db"        # Should use our custom database (psycopg2 uses 'dbname')
+            host="test-host",        
+            port="5433",            
+            user="test-user",       
+            password="test-password", 
+            dbname="test-db"        
         )
         
         # Verify the function returns the mocked connection
@@ -122,18 +93,7 @@ def test_get_postgres_conn_custom_params(mock_env_vars):
 def test_get_postgres_conn_connection_error():
     """
     Test that connection errors are properly propagated.
-    
-    What this test does (simple):
-    - Simulates a database connection failure
-    - Calls the postgres connection function
-    - Checks that the error is properly passed up to the caller
-    
-    Developer Notes:
-    - Uses side_effect to make the mock raise an exception instead of returning a value
-    - Tests error handling and exception propagation
-    - Ensures that database connection failures don't get swallowed silently
-    - Uses pytest.raises() context manager to assert an exception occurs
-    - This is important for debugging production issues
+
     """
     with patch('psycopg2.connect') as mock_connect:
         # Make the mock connection raise an exception instead of connecting
