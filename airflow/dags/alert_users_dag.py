@@ -5,6 +5,7 @@ This DAG handles the notification process for users who have been flagged
 for potentially fraudulent activity by the ML scoring pipeline.
 """
 import os
+import sys
 from datetime import datetime, timedelta
 
 from airflow.datasets import Dataset
@@ -14,7 +15,10 @@ from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
-from helpers.actualdata_postgres import get_actualdata_postgres_conn
+# Add the Airflow path to sys.path so we can import helpers module
+sys.path.append("/opt/airflow")
+
+from helpers.actualdata_postgres import get_actualdata_postgres_conn  # noqa: E402
 
 # Default arguments for the DAG
 default_args = {

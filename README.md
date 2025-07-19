@@ -91,7 +91,7 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
 
 ### 3. **Scoring (Python + ML)**
 
-- Reads enriched marts directly from MinIO using DuckDB  
+- Reads enriched marts directly from MinIO using DuckDB
 - Applies **hybrid fraud detection logic**, combining:
 
   #### 🔍 Rule-Based Scoring:
@@ -112,7 +112,7 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
     - **Precision:** 0.97
     - **Recall:** 0.97
     - **F1 Score:** 0.97
-  PS: Please refer to /scoring/fraud_model_building.ipynb for a walkthrough of how the model was developed. 
+  PS: Please refer to /scoring/fraud_model_building.ipynb for a walkthrough of how the model was developed.
 
 - **Scoring Output:**
   - `fraud_alerts` table containing: `transaction_id`, `risk_score`, `flags`, `ml_score`, `label`
@@ -159,6 +159,5 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
 
 ## 👤 Author
 
-**Karim Tarek** — Data & Analytics Engineer  
+**Karim Tarek** — Data & Analytics Engineer
 📫 [LinkedIn](https://www.linkedin.com/in/karimtarek)
-
