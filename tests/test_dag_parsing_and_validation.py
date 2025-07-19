@@ -9,7 +9,14 @@ This file tests that all Airflow DAGs:
 import os
 
 import pytest
-from airflow.models import DagBag
+
+try:
+    from airflow.models import DagBag
+
+    AIRFLOW_AVAILABLE = True
+except ImportError:
+    AIRFLOW_AVAILABLE = False
+    DagBag = None
 
 DAGS_PATH = os.path.join(os.path.dirname(__file__), "../airflow/dags")
 
@@ -23,6 +30,8 @@ def get_dag_files():
 
 def get_dag_ids():
     """Get list of DAG IDs from DagBag."""
+    if not AIRFLOW_AVAILABLE:
+        return []
     return [
         dag_id
         for dag_id in DagBag(dag_folder=DAGS_PATH, include_examples=False).dags.keys()
@@ -32,14 +41,18 @@ def get_dag_ids():
 @pytest.fixture(scope="module")
 def dagbag():
     """Create DagBag fixture for testing."""
+    if not AIRFLOW_AVAILABLE:
+        pytest.skip("Airflow not available")
     return DagBag(dag_folder=DAGS_PATH, include_examples=False)
 
 
+@pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
 def test_no_import_errors(dagbag):
     """Test that DAGs import without errors."""
     assert dagbag.import_errors == {}, f"Import errors: {dagbag.import_errors}"
 
 
+@pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
 @pytest.mark.parametrize("dag_file", get_dag_files())
 def test_dag_registered(dagbag, dag_file):
     """Test that DAG file is properly registered in DagBag."""
@@ -47,6 +60,7 @@ def test_dag_registered(dagbag, dag_file):
     assert dag_id in dagbag.dags, f"DAG '{dag_id}' not found in dagbag"
 
 
+@pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
 @pytest.mark.parametrize("dag_id", get_dag_ids())
 def test_dag_has_tasks(dagbag, dag_id):
     """Test that DAG has at least one task."""
@@ -54,6 +68,7 @@ def test_dag_has_tasks(dagbag, dag_id):
     assert len(dag.tasks) > 0, f"DAG '{dag_id}' has no tasks"
 
 
+@pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
 @pytest.mark.parametrize("dag_id", get_dag_ids())
 def test_dag_catchup_false(dagbag, dag_id):
     """Test that DAG has catchup set to False."""
@@ -62,6 +77,7 @@ def test_dag_catchup_false(dagbag, dag_id):
     assert dag.catchup is False, f"DAG '{dag_id}' should have catchup=False"
 
 
+@pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
 @pytest.mark.parametrize("dag_id", get_dag_ids())
 def test_dag_no_cycles(dagbag, dag_id):
     """Test that DAG has no circular dependencies."""

@@ -18,7 +18,14 @@ Developer Notes:
 """
 
 import pytest
-from airflow.models import DagBag
+
+try:
+    from airflow.models import DagBag
+
+    AIRFLOW_AVAILABLE = True
+except ImportError:
+    AIRFLOW_AVAILABLE = False
+    DagBag = None
 
 
 class TestDAGDatasetIntegration:
@@ -27,8 +34,11 @@ class TestDAGDatasetIntegration:
     @pytest.fixture
     def dagbag(self):
         """Load all DAGs for testing - simplified version."""
+        if not AIRFLOW_AVAILABLE:
+            pytest.skip("Airflow not available")
         return DagBag(dag_folder="airflow/dags", include_examples=False)
 
+    @pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
     def test_all_dags_exist_and_loadable(self, dagbag):
         """Test that all expected DAGs exist and can be loaded without errors."""
         # Expected DAGs in the fraud detection pipeline
@@ -45,6 +55,7 @@ class TestDAGDatasetIntegration:
                 expected_dag_id in available_dag_ids
             ), f"Expected DAG {expected_dag_id} not found in available DAGs: {available_dag_ids}"
 
+    @pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
     def test_generate_and_partition_dag_structure(self, dagbag):
         """Test the structure of generate_and_partition_data_dag."""
         dag = dagbag.dags.get("generate_and_partition_data_dag")
@@ -63,6 +74,7 @@ class TestDAGDatasetIntegration:
         assert dag.catchup is False, "DAG should have catchup=False"
         assert dag.max_active_runs == 1, "DAG should have max_active_runs=1"
 
+    @pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
     def test_upload_to_minio_dag_structure(self, dagbag):
         """Test the structure of upload_to_minio_dag."""
         dag = dagbag.dags.get("upload_to_minio_dag")
@@ -81,6 +93,7 @@ class TestDAGDatasetIntegration:
         assert dag.catchup is False, "DAG should have catchup=False"
         assert dag.max_active_runs == 1, "DAG should have max_active_runs=1"
 
+    @pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
     def test_run_dbt_dag_structure(self, dagbag):
         """Test the structure of run_dbt_dag."""
         dag = dagbag.dags.get("run_dbt_dag")
@@ -99,6 +112,7 @@ class TestDAGDatasetIntegration:
         assert dag.catchup is False, "DAG should have catchup=False"
         assert dag.max_active_runs == 1, "DAG should have max_active_runs=1"
 
+    @pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
     def test_ml_transaction_scoring_dag_structure(self, dagbag):
         """Test the structure of ml_transaction_scoring_dag."""
         dag = dagbag.dags.get("ml_transaction_scoring_dag")
@@ -117,6 +131,7 @@ class TestDAGDatasetIntegration:
         assert dag.catchup is False, "DAG should have catchup=False"
         assert dag.max_active_runs == 1, "DAG should have max_active_runs=1"
 
+    @pytest.mark.skipif(not AIRFLOW_AVAILABLE, reason="Airflow not available")
     def test_dataset_configuration(self, dagbag):
         """Test dataset configuration across the complete fraud detection pipeline."""
         # Define the complete pipeline DAGs

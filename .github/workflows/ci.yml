@@ -96,18 +96,17 @@ jobs:
         # Install additional testing tools that might not be in your project dependencies
         uv pip install pytest pytest-cov pytest-xdist
 
-    # Step 5b: Install Airflow avoiding problematic dependencies
+    # Step 5b: Install Airflow (simplified for testing)
     - name: Install Airflow
       run: |
         source .venv/bin/activate
-        # First install system dependencies that help with compilation
-        sudo apt-get update && sudo apt-get install -y build-essential
-        # Use environment variable to avoid google-re2 compilation issues
+        # Install system dependencies
+        sudo apt-get update && sudo apt-get install -y build-essential libffi-dev
+        # Set environment variables to avoid compilation issues
         export AIRFLOW_GPL_UNIDECODE=yes
-        # Install Airflow with constraints but allow failures for problematic packages
-        pip install "apache-airflow==2.8.1" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.1/constraints-3.11.txt" || \
-        pip install "apache-airflow==2.8.1" --no-deps && \
-        pip install "pendulum>=2.0,<3.0" "sqlalchemy>=1.4.0,<2.0" "jinja2>=3.0.0" "flask>=2.2,<2.3" "attrs>=22.1.0"
+        export SLUGIFY_USES_TEXT_UNIDECODE=yes
+        # Install Airflow without constraints for better Python 3.13 compatibility
+        pip install --no-cache-dir "apache-airflow==2.8.1"
 
     # Step 6: Create folders and files your tests need
     - name: Create test data directories
@@ -138,7 +137,8 @@ jobs:
         # - test_postgres_helper.py (needs PostgreSQL database)
         # - test_actualdata_postgres_helper.py (needs PostgreSQL database)
         # - test_generate_synthetic_fraud_data.py
-        # - test_dag_parsing_and_validation.py (your DAG validation tests)
+        # - test_dag_parsing_and_validation.py (gracefully skips if Airflow unavailable)
+        # - test_dag_structure_and_datasets.py (gracefully skips if Airflow unavailable)
         # - test_dag_structure_and_datasets.py
         python run_all_tests.py --verbose
 
