@@ -1,0 +1,168 @@
+# This is a GitHub Actions workflow file - it tells GitHub what to do automatically
+# when certain events happen (like pushing code or creating pull requests)
+
+name: CI  # This is the name that appears in GitHub's Actions tab
+
+# WHEN this workflow runs (the triggers)
+on:
+  push:
+    branches: [ main, feat/* ]  # Run when code is pushed to these branches
+  pull_request:
+    branches: [ main ]  # Run when someone creates a PR to main or develop
+  workflow_dispatch:  # Allow manual triggering from GitHub's web interface
+
+# ENVIRONMENT VARIABLES - values that all jobs can use
+env:
+  PYTHON_VERSION: "3.11"  # Which Python version to use everywhere
+  UV_VERSION: "0.4.18"    # Which UV (fast Python package installer) version to use
+
+# JOBS - separate tasks that can run in parallel (like different computers working simultaneously)
+jobs:
+
+  # JOB 1: Test if your Docker image builds correctly
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Download your code from GitHub
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Step 2: Set up Docker with advanced features
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # Step 3: Try to build your Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t fraud-pipeline-patrol:test .
+
+    # Step 4: Test that the built image works
+    - name: Test Docker image
+      run: |
+        docker run --rm fraud-pipeline-patrol:test python --version
+
+  # JOB 2: Run ALL your tests using your existing run_all_tests.py script
+  test-suite:
+    name: Complete Test Suite
+    runs-on: ubuntu-latest  # Use Ubuntu Linux virtual machine
+
+    # SERVICES - additional programs this job needs
+    services:
+      postgres:  # Start a PostgreSQL database for your tests that need it
+        image: postgres:15  # Use PostgreSQL version 15
+        env:
+          # Set up the database with these credentials
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          # Health check commands - make sure the database is ready before continuing
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432  # Make database accessible on port 5432
+
+    # STEPS - sequential actions this job will perform
+    steps:
+    # Step 1: Download your code from GitHub
+    - name: Checkout code
+      uses: actions/checkout@v4  # Pre-built action to download repository
+
+    # Step 2: Install Python
+    - name: Set up Python
+      uses: actions/setup-python@v5  # Pre-built action to install Python
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}  # Use the version we defined above
+
+    # Step 3: Install UV (a fast Python package manager)
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3  # Pre-built action to install UV
+      with:
+        version: ${{ env.UV_VERSION }}
+
+    # Step 4: Create a Python virtual environment (isolated Python installation)
+    - name: Create virtual environment
+      run: uv venv  # Command that creates the virtual environment
+
+    # Step 5: Install your project and all its dependencies
+    - name: Install dependencies
+      run: |
+        # Install your project in development mode - this reads pyproject.toml
+        # and installs all your dependencies (including pytest, airflow, dbt, etc.)
+        uv pip install -e .
+        # Install additional testing tools that might not be in your project dependencies
+        uv pip install pytest pytest-cov pytest-xdist
+
+    # Step 6: Create folders and files your tests need
+    - name: Create test data directories
+      run: |
+        mkdir -p data/raw data/processed data/results  # Create data folders
+        mkdir -p logs  # Create logs folder
+        touch dev.duckdb  # Create an empty database file
+
+    # Step 7: Set environment variables that your code and tests need
+    - name: Set up environment variables
+      run: |
+        # Tell Python where to find your code modules when importing
+        # ${{ github.workspace }} is the full path to your project folder
+        echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
+        # Database connection settings (pointing to our test PostgreSQL service)
+        # Your postgres helper tests need these to connect to the database
+        echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
+        echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
+        echo "POSTGRES_DB=test_db" >> $GITHUB_ENV
+        echo "POSTGRES_USER=postgres" >> $GITHUB_ENV
+        echo "POSTGRES_PASSWORD=postgres" >> $GITHUB_ENV
+
+    # Step 8: Run ALL your tests using your existing test runner
+    - name: Run all tests
+      run: |
+        source .venv/bin/activate  # Activate the virtual environment
+        # Use your existing run_all_tests.py script which runs:
+        # - test_postgres_helper.py (needs PostgreSQL database)
+        # - test_actualdata_postgres_helper.py (needs PostgreSQL database)
+        # - test_generate_synthetic_fraud_data.py
+        # - test_dag_parsing_and_validation.py (your DAG validation tests)
+        # - test_dag_structure_and_datasets.py
+        python run_all_tests.py --verbose
+
+  # JOB 3: Check if your dbt models are valid
+  dbt-validation:
+    name: dbt Model Validation
+    runs-on: ubuntu-latest
+
+    steps:
+    # Same setup as before
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: ${{ env.UV_VERSION }}
+
+    - name: Create virtual environment
+      run: uv venv
+
+    - name: Install dependencies
+      run: |
+        # Install your project (this includes dbt from your pyproject.toml)
+        uv pip install -e .
+
+    # Test your dbt project separately from your Python tests
+    - name: Validate dbt project
+      run: |
+        source .venv/bin/activate
+        cd dbt/fraud_detection  # Go to your dbt project folder
+        dbt debug    # Check dbt configuration is valid
+        dbt parse    # Check SQL syntax in your models
+        dbt compile  # Try to compile your models to actual SQL
