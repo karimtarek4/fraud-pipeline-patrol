@@ -95,8 +95,15 @@ jobs:
         uv pip install -e .
         # Install additional testing tools that might not be in your project dependencies
         uv pip install pytest pytest-cov pytest-xdist
-        # Ensure Airflow is properly installed for DAG tests
-        uv pip install apache-airflow==2.8.1
+
+    # Step 5b: Install Airflow with minimal dependencies
+    - name: Install Airflow (minimal)
+      run: |
+        source .venv/bin/activate
+        # Try installing with no dependencies first, then add core dependencies manually
+        pip install "apache-airflow==2.8.1" --no-deps
+        # Install only the essential dependencies needed for our tests
+        pip install "pendulum>=2.0,<3.0" "sqlalchemy>=1.4.0,<2.0" "tabulate>=0.7.5" "packaging>=14.0" "python-dateutil>=2.3" "pluggy>=1.0"
 
     # Step 6: Create folders and files your tests need
     - name: Create test data directories
