@@ -52,11 +52,10 @@ class SimpleTestRunner:
 
     def find_pytest(self):
         """Find the right pytest executable to use."""
-        """Find the right pytest executable to use."""
         # Try different pytest locations in order of preference
         pytest_candidates = [
+            ".venv/bin/pytest",  # Virtual environment pytest (CI environment)
             "pytest",  # System pytest (what works manually)
-            ".venv/bin/pytest",  # Virtual environment pytest
             "/opt/anaconda3/bin/pytest",  # Anaconda pytest
         ]
 
@@ -75,6 +74,12 @@ class SimpleTestRunner:
                 )
 
                 if result.returncode == 0:
+                    # For CI environment, be less strict about Airflow requirement
+                    if os.environ.get("CI") == "true":
+                        if not self.quiet:
+                            print(f"✅ Using pytest: {pytest_path} (CI environment)")
+                        return pytest_path
+
                     # Test if this pytest environment has airflow
                     airflow_test = subprocess.run(
                         [

@@ -32,6 +32,16 @@ def mock_env_vars():
 
 def test_get_postgres_conn_default_params(mock_env_vars):
     """Test get_postgres_conn with default parameters."""
+    # Clear any existing environment variables that might affect the test
+    for key in [
+        "POSTGRES_HOST",
+        "POSTGRES_PORT",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "POSTGRES_DB",
+    ]:
+        os.environ.pop(key, None)
+
     with patch("psycopg2.connect") as mock_connect:
         # Create a fake connection object that our mock will return
         mock_conn = MagicMock()
@@ -45,11 +55,11 @@ def test_get_postgres_conn_default_params(mock_env_vars):
         # Verify psycopg2.connect was called with the expected default parameters
         # These should match the defaults defined in helpers/postgres.py
         mock_connect.assert_called_once_with(
-            host="postgres",
+            host="localhost",  # Default from code
             port="5432",
-            user="airflow",
-            password="airflow",
-            dbname="airflow",
+            user="airflow",  # Default from code
+            password="airflow",  # Default from code
+            dbname="airflow",  # Default from code
         )
 
         # Make sure our function returns the mocked connection

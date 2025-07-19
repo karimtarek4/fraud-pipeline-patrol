@@ -95,6 +95,8 @@ jobs:
         uv pip install -e .
         # Install additional testing tools that might not be in your project dependencies
         uv pip install pytest pytest-cov pytest-xdist
+        # Ensure Airflow is properly installed for DAG tests
+        uv pip install apache-airflow==2.8.1
 
     # Step 6: Create folders and files your tests need
     - name: Create test data directories
