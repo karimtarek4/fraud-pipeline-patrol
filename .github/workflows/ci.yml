@@ -96,14 +96,18 @@ jobs:
         # Install additional testing tools that might not be in your project dependencies
         uv pip install pytest pytest-cov pytest-xdist
 
-    # Step 5b: Install Airflow with minimal dependencies
-    - name: Install Airflow (minimal)
+    # Step 5b: Install Airflow avoiding problematic dependencies
+    - name: Install Airflow
       run: |
         source .venv/bin/activate
-        # Try installing with no dependencies first, then add core dependencies manually
-        pip install "apache-airflow==2.8.1" --no-deps
-        # Install only the essential dependencies needed for our tests
-        pip install "pendulum>=2.0,<3.0" "sqlalchemy>=1.4.0,<2.0" "tabulate>=0.7.5" "packaging>=14.0" "python-dateutil>=2.3" "pluggy>=1.0"
+        # First install system dependencies that help with compilation
+        sudo apt-get update && sudo apt-get install -y build-essential
+        # Use environment variable to avoid google-re2 compilation issues
+        export AIRFLOW_GPL_UNIDECODE=yes
+        # Install Airflow with constraints but allow failures for problematic packages
+        pip install "apache-airflow==2.8.1" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.1/constraints-3.11.txt" || \
+        pip install "apache-airflow==2.8.1" --no-deps && \
+        pip install "pendulum>=2.0,<3.0" "sqlalchemy>=1.4.0,<2.0" "jinja2>=3.0.0" "flask>=2.2,<2.3" "attrs>=22.1.0"
 
     # Step 6: Create folders and files your tests need
     - name: Create test data directories
