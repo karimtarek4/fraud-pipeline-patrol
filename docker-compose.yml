@@ -5,10 +5,12 @@ services:
   airflow-init-variables:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile©∫
     container_name: airflow-init-variables
+    env_file:
+      - .env
     environment:
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     volumes:
       - ./airflow:/opt/airflow
     command: >
@@ -25,8 +27,8 @@ services:
     image: minio/minio:latest
     container_name: minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_API_EXTERNAL_PORT}:9000"
+      - "${MINIO_CONSOLE_EXTERNAL_PORT}:9001"
     env_file:
       - .env
     command: server /data --console-address ":9001"
@@ -37,12 +39,14 @@ services:
     image: postgres:15
     container_name: postgres
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5434:5432"
+      - "${POSTGRES_EXTERNAL_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -55,27 +59,31 @@ services:
       - minio
       - airflow-init-variables
     ports:
-      - "8080:8080"
+      - "${AIRFLOW_EXTERNAL_PORT}:8080"
     env_file:
       - .env
     environment:
-      - S3_ENDPOINT=minio:9000
-      - S3_ACCESS_KEY_ID=minioadmin
-      - S3_SECRET_ACCESS_KEY=minioadmin
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=airflow
-      - POSTGRES_PASSWORD=airflow
-      - POSTGRES_DB=airflow
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      - ACTUALDATA_POSTGRES_HOST=actualdata-postgres
-      - ACTUALDATA_POSTGRES_PORT=5432
-      - ACTUALDATA_POSTGRES_USER=actualdata
-      - ACTUALDATA_POSTGRES_PASSWORD=actualdata_pass
-      - ACTUALDATA_POSTGRES_DB=actualdata
-      - MB_HOSTNAME=metabase
-      - MB_PORT=3000
+      - S3_ENDPOINT=${S3_ENDPOINT}
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - AIRFLOW__CORE__EXECUTOR=${AIRFLOW__CORE__EXECUTOR}
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - ACTUALDATA_POSTGRES_HOST=${ACTUALDATA_POSTGRES_HOST}
+      - ACTUALDATA_POSTGRES_PORT=${ACTUALDATA_POSTGRES_PORT}
+      - ACTUALDATA_POSTGRES_USER=${ACTUALDATA_POSTGRES_USER}
+      - ACTUALDATA_POSTGRES_PASSWORD=${ACTUALDATA_POSTGRES_PASSWORD}
+      - ACTUALDATA_POSTGRES_DB=${ACTUALDATA_POSTGRES_DB}
+      - MB_HOSTNAME=${MB_HOSTNAME}
+      - MB_PORT=${MB_PORT}
+      - METABASE_ADMIN_EMAIL=${METABASE_ADMIN_EMAIL}
+      - METABASE_ADMIN_PASSWORD=${METABASE_ADMIN_PASSWORD}
+      - METABASE_ADMIN_FIRST_NAME=${METABASE_ADMIN_FIRST_NAME}
+      - METABASE_ADMIN_LAST_NAME=${METABASE_ADMIN_LAST_NAME}
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
@@ -102,11 +110,11 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_USER: actualdata
-      POSTGRES_PASSWORD: actualdata_pass
-      POSTGRES_DB: actualdata
+      POSTGRES_USER: ${ACTUALDATA_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ACTUALDATA_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${ACTUALDATA_POSTGRES_DB}
     ports:
-      - "5436:5432"
+      - "${ACTUALDATA_POSTGRES_EXTERNAL_PORT}:5432"
     volumes:
       - actualdata_postgres_data:/var/lib/postgresql/data
     depends_on:
@@ -119,11 +127,11 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_USER: metabase
-      POSTGRES_PASSWORD: metabase_pass
-      POSTGRES_DB: metabase
+      POSTGRES_USER: ${METABASE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${METABASE_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${METABASE_POSTGRES_DB}
     ports:
-      - "5435:5432"
+      - "${METABASE_POSTGRES_EXTERNAL_PORT}:5432"
     volumes:
       - metabase_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -140,20 +148,21 @@ services:
         metabase-postgres:
           condition: service_healthy
       ports:
-        - "3000:3000"
+        - "${METABASE_EXTERNAL_PORT}:3000"
       env_file:
         - .env
       environment:
         MB_DB_TYPE: postgres
-        MB_DB_DBNAME:  metabase
-        MB_DB_PORT: 5432
-        MB_DB_USER: metabase
-        MB_DB_PASS: metabase_pass
-        MB_DB_HOST: metabase-postgres
-        MB_SETUP_ADMIN_EMAIL: admin@metabase.local
-        MB_SETUP_ADMIN_PASSWORD: metabaseadminpass
-        MB_SETUP_ADMIN_FIRST_NAME: Admin
-        MB_SETUP_ADMIN_LAST_NAME: User
+        MB_DB_DBNAME: ${METABASE_POSTGRES_DB}
+        MB_DB_PORT: ${METABASE_POSTGRES_PORT}
+        MB_DB_USER: ${METABASE_POSTGRES_USER}
+        MB_DB_PASS: ${METABASE_POSTGRES_PASSWORD}
+        MB_DB_HOST: ${METABASE_POSTGRES_HOST}
+        # Pass these variables for the initialization script
+        METABASE_ADMIN_EMAIL: ${METABASE_ADMIN_EMAIL}
+        METABASE_ADMIN_PASSWORD: ${METABASE_ADMIN_PASSWORD}
+        METABASE_ADMIN_FIRST_NAME: ${METABASE_ADMIN_FIRST_NAME}
+        METABASE_ADMIN_LAST_NAME: ${METABASE_ADMIN_LAST_NAME}
 
 volumes:
   postgres_data:
