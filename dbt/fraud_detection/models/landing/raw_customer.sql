@@ -1,5 +1,5 @@
 WITH base AS (
-        SELECT 
+        SELECT
             CustomerID,
             AccountCreationDate,
             Age,
@@ -11,7 +11,7 @@ WITH base AS (
             HomeLat,
             HomeLon,
             current_localtimestamp() AS ingestion_date
-        FROM 
+        FROM
             {{ source('fraud_data', 'customers') }}
 )
 

@@ -20,7 +20,7 @@ derived_columns AS (
         date_part('year', account_creation_date) AS account_creation_year,
         -- Use DuckDB'sage function for cleaner date calculations
         date_part('day', age(account_creation_date)) AS account_age_days,
-        -- Derived categorical grouping 
+        -- Derived categorical grouping
         CASE
             WHEN age < 25 THEN 'Under 25'
             WHEN age BETWEEN 25 AND 34 THEN '25-34'
@@ -30,8 +30,8 @@ derived_columns AS (
             WHEN age >= 65 THEN '65+'
             ELSE 'Unknown'
         END AS age_tier,
-        -- Derived risk classification 
-        CASE 
+        -- Derived risk classification
+        CASE
             WHEN past_fraud_count > 5 THEN 'High'
             WHEN past_fraud_count > 2 THEN 'Medium'
             ELSE 'Low'
@@ -48,7 +48,7 @@ SELECT
     age,
     past_fraud_count,
     home_device,
-    home_ip, 
+    home_ip,
     home_latitude,
     home_longitude,
     -- flags
@@ -61,5 +61,5 @@ SELECT
     age_tier,
     -- Derived risk classification based on fraud history
     risk_level
-FROM 
+FROM
     derived_columns

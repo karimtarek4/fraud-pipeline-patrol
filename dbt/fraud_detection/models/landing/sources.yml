@@ -14,6 +14,6 @@ sources:
 
       - name: merchants
         description: "Merchant reference data, including merchant category, risk score, and location."
-        
+
       - name: login_attempts
         description: "Customer login attempts, including timestamps, device, IP, and success/failure status."

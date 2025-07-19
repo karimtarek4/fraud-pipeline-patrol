@@ -1,6 +1,6 @@
   # ...existing code...
 services:
-  
+
   # Initialize Airflow variables
   airflow-init-variables:
     build:
@@ -20,7 +20,7 @@ services:
     depends_on:
       - postgres
     restart: "no"
-  
+
   minio:
     image: minio/minio:latest
     container_name: minio
