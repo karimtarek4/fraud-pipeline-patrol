@@ -1,9 +1,10 @@
-# 🛡️ Fraud Pipeline Patrol — Modular, Production-Inspired Fraud Detection
-
-![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
 ![dbt](https://img.shields.io/badge/dbt-%23FF694B.svg?logo=dbt&logoColor=white)
-![Airflow](https://img.shields.io/badge/Airflow-2.7.0-blue?logo=apache-airflow)
+![Airflow](https://img.shields.io/badge/Airflow-2.8.1-blue?logo=apache-airflow)
 ![Docker](https://img.shields.io/badge/Docker-Desktop-blue?logo=docker)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green?logo=github)
+![Security](https://img.shields.io/badge/Security-Bandit%20%7C%20Safety-red?logo=security)
+![Code Quality](https://img.shields.io/badge/Code%20Quality-Black%20%7C%20Flake8%20%7C%20MyPy-blue?logo=code-review)
 
 A modular, end-to-end fraud detection pipeline simulating real-world data workflows using Airflow, dbt, Python, and modern data tools. This project demonstrates advanced analytics engineering, orchestration, and modeling skills—built to impress and inspire!
 
@@ -18,6 +19,7 @@ Build a robust, production-style data pipeline that detects fraudulent financial
 - Hybrid rule-based + ML risk scoring in Python
 - Alerting and auto-generated Metabase dashboards
 - Fully dockerized, reproducible development environment
+- CI/CD Pipeline
 
 ---
 
@@ -40,40 +42,6 @@ Build a robust, production-style data pipeline that detects fraudulent financial
 ## 🧭 Architecture Diagram
 
 ![Architecture](assets/architecture_diagram.png)
-
-## 🧪 Testing & Quality Assurance
-
-This project includes a comprehensive test suite with **44 tests** across multiple categories to ensure pipeline reliability and correctness:
-
-| Test Category | Files | Tests | Coverage |
-|---------------|-------|-------|----------|
-| **Unit Tests** | 2 | 6 | Database connections & helpers |
-| **Script Tests** | 1 | 7 | Data generation & file operations |
-| **DAG Tests** | 2 | 31 | Airflow pipeline validation |
-
-### Key Testing Features:
-- **Automated Test Runner**: `python run_all_tests.py` - detects environments and runs all tests
-- **Environment Detection**: Automatically finds the correct pytest with Airflow support
-- **Comprehensive Coverage**: Tests database connections, data generation logic, and complete DAG pipeline validation
-- **CI/CD Ready**: Proper exit codes and reporting for continuous integration
-
-### Quick Test Commands:
-```bash
-# Run all tests with automatic environment detection
-python run_all_tests.py
-```
-
-## ⛓️ Orchestration Logic
-
-- Modular Airflow DAGs orchestrate each stage:
-generate_data → upload_to_minio → run_dbt → score_transactions → alert_users → init_metabase
-
-- **Data-Driven Triggering**: Uses Airflow Datasets to automatically trigger downstream DAGs when data is ready (file://, s3://, postgresql:// datasets)
-- **Runtime Configuration**: Airflow Variables enable operational flexibility - toggle features (alerts, Metabase), adjust scheduling, and modify script paths without code changes
-- **Smart Branching Logic**: Implements conditional workflows using BranchPythonOperator for feature toggles and concurrency control
-- Resource-safe, testable modules that support local and remote execution
-
----
 
 ## 🔄 Pipeline Flow
 
@@ -135,14 +103,63 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
   - Risk score distribution
 - Dashboards are updated on each DAG run via automatic refresh
 
+
+## 5. Testing & Quality Assurance
+
+This project includes a comprehensive test suite with **44 tests** across multiple categories to ensure pipeline reliability and correctness:
+
+| Test Category | Files | Tests | Coverage |
+|---------------|-------|-------|----------|
+| **Unit Tests** | 2 | 6 | Database connections & helpers |
+| **Script Tests** | 1 | 7 | Data generation & file operations |
+| **DAG Tests** | 2 | 31 | Airflow pipeline validation |
+
+### Key Testing Features:
+- **Automated Test Runner**: `python run_all_tests.py` - detects environments and runs all tests
+- **Environment Detection**: Automatically finds the correct pytest with Airflow support
+- **Comprehensive Coverage**: Tests database connections, data generation logic, and complete DAG pipeline validation
+- **CI/CD Ready**: Proper exit codes and reporting for continuous integration
+
+### Quick Local Test Commands:
+```bash
+# Run all tests with automatic environment detection
+python run_all_tests.py
+```
+
+### 6. CI/CD Pipeline (GitHub Actions)
+
+Our **4-stage enterprise CI/CD pipeline** ensures code quality, security, and reliability:
+
+| Stage | Purpose | Tools | Validation |
+|-------|---------|-------|------------|
+| **🏗️ Docker Build** | Container integrity | Docker, BuildKit | Multi-platform builds |
+| **🧪 Test Suite** | Code reliability | pytest, custom runner | 44+ automated tests |
+| **✈️ Airflow Validation** | Pipeline integrity | Airflow DAG parsing | Syntax & import validation |
+| **📊 dbt Validation** | Model integrity | dbt compile, test | SQL compilation & tests |
+
 ---
 
-## 🚧 Next Steps & Improvements
 
-- Build a Streamlit or web-based monitoring UI
+### 7⚡ Makefile Commands
 
----
+We've created a comprehensive Makefile for **effortless project interaction**:
 
+```bash
+# 🚀 Quick Start
+make setup              # Full development environment setup
+make install-dev        # Install all dependencies
+make setup-hooks        # Configure pre-commit hooks
+
+# 🧪 Testing & Quality
+make test              # Run all 44+ tests
+make lint              # Run linting checks
+make format            # Auto-format code
+make security          # Security vulnerability scan
+make pre-commit        # Run all quality checks
+
+# 📋 Help
+make help              # Show all available commands
+```
 
 ## 🌟 Why This Project Stands Out
 
@@ -154,6 +171,7 @@ generate_data → upload_to_minio → run_dbt → score_transactions → alert_u
 - **Hybrid Scoring:** Combines transparent rules with adaptive ML logic
 - **Self-building dashboards:** Metabase is fully automated and initialized via Airflow
 - **Modular & extensible:** Each component can be swapped, scaled, or extended
+- **DevOps & CI/CD Excellence**  4-stage GitHub Actions workflow with comprehensive validation
 
 ---
 
