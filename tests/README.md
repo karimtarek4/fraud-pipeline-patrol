@@ -27,7 +27,7 @@ The test suite follows these principles:
 ### Unit Tests
 Tests for helper functions and utility modules that provide database connections and other core functionality.
 
-### Script Tests  
+### Script Tests
 Tests for data generation and processing scripts that create synthetic fraud data and handle file operations.
 
 ### DAG Tests
@@ -59,4 +59,3 @@ python run_all_tests.py -v
 python run_all_tests.py -q
 
 ```
-
