@@ -29,13 +29,7 @@ class SimpleTestRunner:
         """Initialize the test runner with output options."""
         self.verbose = verbose
         self.quiet = quiet
-
-    def run_test_file(self, test_file):
-        """Run a single test file with pytest."""
         self.project_root = Path(__file__).parent
-
-        # Detect the right pytest to use
-        self.pytest_cmd = self.find_pytest()
 
         # List of all test files
         self.test_files = [
@@ -47,6 +41,14 @@ class SimpleTestRunner:
         ]
 
         self.results = []
+
+        # Detect the right pytest to use
+        self.pytest_cmd = self.find_pytest()
+
+    def run_test_file(self, test_file):
+        """Run a single test file with pytest."""
+        # This method is kept for compatibility but doesn't need initialization
+        pass
 
     def find_pytest(self):
         """Find the right pytest executable to use."""
