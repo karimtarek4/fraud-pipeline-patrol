@@ -58,7 +58,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_DB: test_db
         options: >-
-          # Health check commands - make sure the database is ready before continuing
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
@@ -163,6 +162,7 @@ jobs:
       run: |
         source .venv/bin/activate
         cd dbt/fraud_detection  # Go to your dbt project folder
+        dbt deps    # Install dbt dependencies
         dbt debug    # Check dbt configuration is valid
         dbt parse    # Check SQL syntax in your models
         dbt compile  # Try to compile your models to actual SQL
