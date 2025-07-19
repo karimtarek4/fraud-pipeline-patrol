@@ -16,7 +16,7 @@ Options:
 
 import argparse
 import os
-import subprocess
+import subprocess  # nosec B404
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -65,7 +65,7 @@ class SimpleTestRunner:
                 env = os.environ.copy()
                 env["PYTHONPATH"] = "."
 
-                result = subprocess.run(
+                result = subprocess.run(  # nosec B603
                     [pytest_path, "--version"],
                     capture_output=True,
                     text=True,
@@ -81,7 +81,7 @@ class SimpleTestRunner:
                         return pytest_path
 
                     # Test if this pytest environment has airflow
-                    airflow_test = subprocess.run(
+                    airflow_test = subprocess.run(  # nosec B603
                         [
                             pytest_path.replace("pytest", "python"),
                             "-c",
@@ -104,7 +104,8 @@ class SimpleTestRunner:
                             print(f"⚠️  {pytest_path} available but no Airflow support")
 
             except Exception:
-                continue
+                # Skip this pytest installation if we can't test it
+                continue  # nosec B112
 
         # Fallback to system pytest
         if not self.quiet:
@@ -135,7 +136,7 @@ class SimpleTestRunner:
             env = os.environ.copy()
             env["PYTHONPATH"] = "."
 
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603
                 cmd,
                 cwd=self.project_root,
                 env=env,

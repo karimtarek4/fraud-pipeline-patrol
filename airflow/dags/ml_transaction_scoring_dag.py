@@ -5,7 +5,7 @@ This DAG processes transaction data through ML models to generate
 fraud scores and predictions for downstream analysis.
 """
 import os
-import subprocess
+import subprocess  # nosec B404
 from datetime import datetime, timedelta
 
 from airflow.datasets import Dataset
@@ -50,7 +50,14 @@ def run_score_transactions_task():
         default_var="/opt/airflow/scoring/scripts/score_transactions.py",
     )
 
-    result = subprocess.run(["python", SCRIPT_PATH], capture_output=True, text=True)
+    # Use absolute path for security
+    result = subprocess.run(  # nosec B603 B607
+        ["/app/.venv/bin/python", SCRIPT_PATH],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=300,  # 5 minute timeout
+    )
     if result.stdout:
         print(f"Script output:\n{result.stdout}")
     if result.returncode != 0:

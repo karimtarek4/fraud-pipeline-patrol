@@ -80,8 +80,8 @@ def create_alerts_table_if_not_exists(conn, table_name="fraud_alerts"):
     with conn.cursor() as cur:
         cur.execute(
             sql.SQL(
-                f"""
-            CREATE TABLE IF NOT EXISTS {table_name} (
+                """
+            CREATE TABLE IF NOT EXISTS {table} (
                 id SERIAL PRIMARY KEY,
                 transaction_id VARCHAR(255),
                 customer_id VARCHAR(255),
@@ -91,7 +91,7 @@ def create_alerts_table_if_not_exists(conn, table_name="fraud_alerts"):
                 inserted_at TIMESTAMP DEFAULT NOW()
             )
         """
-            )
+            ).format(table=sql.Identifier(table_name))
         )
         conn.commit()
 
@@ -104,11 +104,11 @@ def insert_alerts_df(conn, df, table_name="fraud_alerts"):
         for _, row in df.iterrows():
             cur.execute(
                 sql.SQL(
-                    f"""
-                INSERT INTO {table_name} (transaction_id, customer_id, transaction_timestamp, risk_score, flags, inserted_at)
+                    """
+                INSERT INTO {table} (transaction_id, customer_id, transaction_timestamp, risk_score, flags, inserted_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """
-                ),
+                ).format(table=sql.Identifier(table_name)),
                 (
                     str(row["transaction_id"]),
                     str(row["customer_id"]),
@@ -142,8 +142,10 @@ def connect_to_minio():
 
 def load_marts(con):
     """Load transaction and login data marts from MinIO."""
-    tx = con.execute(f"SELECT * FROM '{TRANSACTION_MART}' LIMIT 5000").fetchdf()
-    logins = con.execute(f"SELECT * FROM '{LOGIN_MART}'").fetchdf()
+    tx = con.execute(
+        f"SELECT * FROM '{TRANSACTION_MART}' LIMIT 5000"  # nosec B608
+    ).fetchdf()
+    logins = con.execute(f"SELECT * FROM '{LOGIN_MART}'").fetchdf()  # nosec B608
     tx["transaction_timestamp"] = pd.to_datetime(tx["transaction_timestamp"])
     logins["login_timestamp"] = pd.to_datetime(logins["login_timestamp"])
     return tx, logins

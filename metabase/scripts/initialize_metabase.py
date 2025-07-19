@@ -22,10 +22,20 @@ logger = logging.getLogger(__name__)
 
 MB_HOSTNAME = os.environ.get("MB_HOSTNAME", "localhost")
 MB_PORT = os.environ.get("MB_PORT", "3000")
-ADMIN_EMAIL = "kareem@gmail.com"
-ADMIN_PASSWORD = "K@reem2025!secure"
-ADMIN_FIRST_NAME = "kareem"
-ADMIN_LAST_NAME = "tarek"
+
+# Use environment variables - no hardcoded credentials
+ADMIN_EMAIL = os.environ.get("METABASE_ADMIN_EMAIL")
+ADMIN_PASSWORD = os.environ.get("METABASE_ADMIN_PASSWORD")
+ADMIN_FIRST_NAME = os.environ.get("METABASE_ADMIN_FIRST_NAME", "Admin")
+ADMIN_LAST_NAME = os.environ.get("METABASE_ADMIN_LAST_NAME", "User")
+
+# Validate required environment variables
+if not ADMIN_EMAIL or not ADMIN_PASSWORD:
+    raise ValueError(
+        "METABASE_ADMIN_EMAIL and METABASE_ADMIN_PASSWORD environment variables are required. "
+        "Please check your .env file or docker-compose environment variables."
+    )
+
 METABASE_URL = f"http://{MB_HOSTNAME}:{MB_PORT}"
 USERNAME = ADMIN_EMAIL
 PASSWORD = ADMIN_PASSWORD
@@ -41,15 +51,17 @@ def wait_for_metabase():
             if resp.status_code == 200:
                 logger.info("Metabase is up!")
                 break
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Metabase not ready yet: {e}")
         time.sleep(5)
 
 
 def get_session_token():
     """Authenticate as admin and return the session token."""
     resp = requests.post(
-        f"{METABASE_URL}/api/session", json={"username": USERNAME, "password": PASSWORD}
+        f"{METABASE_URL}/api/session",
+        json={"username": USERNAME, "password": PASSWORD},
+        timeout=30,
     )
     resp.raise_for_status()
     logger.info("Authenticated and obtained session token.")
@@ -59,7 +71,7 @@ def get_session_token():
 def create_admin_user():
     """Create the Metabase admin user via the setup API (if not already created)."""
     url = f"http://{MB_HOSTNAME}:{MB_PORT}/api/session/properties"
-    setup_token = requests.get(url).json().get("setup-token")
+    setup_token = requests.get(url, timeout=30).json().get("setup-token")
     if not setup_token:
         logger.error("❌ Failed to get setup token. Setup may already be complete.")
         return False
@@ -73,7 +85,9 @@ def create_admin_user():
         },
         "prefs": {"allow_tracking": False, "site_name": "Metabase Instance"},
     }
-    resp = requests.post(f"http://{MB_HOSTNAME}:{MB_PORT}/api/setup", json=payload)
+    resp = requests.post(
+        f"http://{MB_HOSTNAME}:{MB_PORT}/api/setup", json=payload, timeout=30
+    )
     if resp.status_code != 200:
         logger.error(
             "❌ Failed to create admin user. It may already exist or setup is already complete."
@@ -107,7 +121,9 @@ def get_or_create_session_token():
 def get_existing_databases(session_id):
     """Get all existing database names from Metabase."""
     resp = requests.get(
-        f"{METABASE_URL}/api/database", headers={"X-Metabase-Session": session_id}
+        f"{METABASE_URL}/api/database",
+        headers={"X-Metabase-Session": session_id},
+        timeout=30,
     )
     resp.raise_for_status()
     response_data = resp.json()
@@ -124,7 +140,9 @@ def get_existing_databases(session_id):
 def get_existing_cards(session_id):
     """Get all existing card names from Metabase."""
     resp = requests.get(
-        f"{METABASE_URL}/api/card", headers={"X-Metabase-Session": session_id}
+        f"{METABASE_URL}/api/card",
+        headers={"X-Metabase-Session": session_id},
+        timeout=30,
     )
     resp.raise_for_status()
     response_data = resp.json()
@@ -141,7 +159,9 @@ def get_existing_cards(session_id):
 def get_existing_dashboards(session_id):
     """Get all existing dashboard names from Metabase."""
     resp = requests.get(
-        f"{METABASE_URL}/api/dashboard", headers={"X-Metabase-Session": session_id}
+        f"{METABASE_URL}/api/dashboard",
+        headers={"X-Metabase-Session": session_id},
+        timeout=30,
     )
     resp.raise_for_status()
     response_data = resp.json()
@@ -183,6 +203,7 @@ def add_actualdata_postgres(session_id):
         f"http://{MB_HOSTNAME}:{MB_PORT}/api/database",
         headers={"X-Metabase-Session": session_id},
         json=db_payload,
+        timeout=30,
     )
     resp.raise_for_status()
     logger.info(f"🗄️ Added '{db_name}' database to Metabase.")
@@ -210,6 +231,7 @@ def create_cards(session_id):
             f"{METABASE_URL}/api/card",
             headers={"X-Metabase-Session": session_id},
             json=card,
+            timeout=30,
         )
         if resp.status_code == 200:
             logger.info(f"📊 Created card: {card_name}")
@@ -248,6 +270,7 @@ def create_dashboards(session_id):
             f"{METABASE_URL}/api/dashboard",
             headers={"X-Metabase-Session": session_id},
             json=dash,
+            timeout=30,
         )
         if resp.status_code == 200:
             logger.info(f"📈 Created dashboard: {dashboard_name}")

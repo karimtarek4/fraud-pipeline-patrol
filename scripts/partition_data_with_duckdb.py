@@ -48,7 +48,7 @@ def main():
         SELECT
             *
         FROM read_parquet('{raw_dir}/{file_type}.parquet')
-        """
+        """  # nosec B608
         )
         # @TODO Change hardcoded partition statements to dynamic ones.
         if file_type == "customers":

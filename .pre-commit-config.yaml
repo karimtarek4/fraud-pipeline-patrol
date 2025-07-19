@@ -37,11 +37,11 @@ repos:
         # Example: Reports "E302 expected 2 blank lines, found 1" or "undefined variable"
 
   # Security vulnerability scanner - REPORTS security issues
-  # - repo: https://github.com/pycqa/bandit
-  #   rev: 1.7.5
-  #   hooks:
-  #     - id: bandit
-  #       additional_dependencies: ["bandit[toml]"]
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        additional_dependencies: ["bandit[toml]"]
         # Example: Reports "hardcoded password" or "use of eval() is dangerous"
 
   # Type checker - REPORTS type-related errors
