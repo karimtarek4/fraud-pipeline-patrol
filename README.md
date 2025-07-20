@@ -71,6 +71,12 @@ fraud-pipeline-patrol/
 - 44+ comprehensive tests: unit, integration, DAG validation
 - Automated CI/CD with security scanning and code quality checks
 
+### 7. **🚀 CI/CD Pipeline** ([`.github/CI_CD_README.md`](.github/CI_CD_README.md))
+- 4-stage GitHub Actions workflow: Docker build, test suite, Airflow validation, dbt validation
+- Automated code quality checks: Black, flake8, isort, mypy
+- Security scanning: Bandit vulnerability detection, dependency safety checks
+- Pre-commit hooks for local development quality gates
+
 ## ⚡ Quick Start
 
 ```bash
