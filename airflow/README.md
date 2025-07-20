@@ -7,91 +7,99 @@ This directory contains all the Apache Airflow DAGs that automate and coordinate
 
 ## 🗺️ Pipeline Overview
 
-The pipeline is composed of several modular DAGs, each responsible for a specific stage in the data lifecycle. The DAGs are connected in a downstream sequence, where the completion of one triggers the next, ensuring a robust and maintainable workflow.
+The pipeline is composed of several modular DAGs, each responsible for a specific stage in the data lifecycle. The DAGs are connected via **Airflow Datasets**, where the completion of one DAG produces datasets that automatically trigger downstream DAGs, ensuring a robust and maintainable workflow.
 
 ```
 [generate_and_partition_data_dag]
-            │
-            ▼
-   [upload_to_minio_dag]
-            │
-            ▼
-        [run_dbt_dag]
-            │
-            ▼
- [ml_transaction_scoring_dag]
-            │
-            ▼
-    [alert_users_dag]
-            │
-            ▼
-[visualize_alert_data_dag]
+        │ (produces file datasets)
+        ▼
+[upload_to_minio_dag]
+        │ (produces MinIO S3 dataset)
+        ▼
+[run_dbt_dag]
+        │ (produces MinIO marts dataset)
+        ▼
+[ml_transaction_scoring_dag]
+        │ (produces PostgreSQL fraud_alerts dataset)
+        ▼
+[alert_users_dag]
+        │ (optionally triggers via TriggerDagRunOperator)
+        ▼
+[initialize_metabase_dag]
 ```
 
 ---
 
-## 🔄 DAG Sequence & Dependencies
+## 🔄 DAG Sequence & Dataset Dependencies
 
 ### 1. `generate_and_partition_data_dag`
 - **Purpose:** Generates synthetic fraud data and partitions it for efficient processing.
-- **Logic:**
-  - Waits for all other DAGs to finish before starting (to avoid resource conflicts).
-  - Runs scripts to generate and partition data.
-  - **Triggers:** `upload_to_minio_dag` upon completion.
+- **Schedule:** Configurable via Airflow Variables (default: `*/1 * * * *`)
+- **Produces Datasets:**
+  - `file:///opt/airflow/data/processed/customers/`
+  - `file:///opt/airflow/data/processed/merchants/`
+  - `file:///opt/airflow/data/processed/transactions/`
+  - `file:///opt/airflow/data/processed/login_attempts/`
+- **Triggers:** `upload_to_minio_dag` via dataset production
 
 ---
 
 ### 2. `upload_to_minio_dag`
 - **Purpose:** Uploads partitioned data to MinIO, maintaining directory structure.
-- **Logic:**
-  - Executes a script to upload all processed data.
-  - **Triggers:** `run_dbt_dag` after upload is complete.
+- **Consumes Datasets:** All file datasets from `generate_and_partition_data_dag`
+- **Produces Dataset:** `s3://minio:9000/fraud-data-processed/`
+- **Triggers:** `run_dbt_dag` via dataset production
 
 ---
 
 ### 3. `run_dbt_dag`
 - **Purpose:** Runs DBT models to transform and prepare data for scoring.
+- **Consumes Dataset:** `s3://minio:9000/fraud-data-processed/`
+- **Produces Dataset:** `s3://minio:9000/fraud-data-processed/marts/`
 - **Logic:**
-  - Installs DBT dependencies.
-  - Executes DBT transformations.
-  - **Triggers:** `ml_transaction_scoring_dag` after DBT run.
+  - Installs DBT dependencies
+  - Executes DBT transformations
+- **Triggers:** `ml_transaction_scoring_dag` via dataset production
 
 ---
 
 ### 4. `ml_transaction_scoring_dag`
-- **Purpose:** Scores transactions using the latest models and logic.
+- **Purpose:** Scores transactions using ML models and generates fraud alerts.
+- **Consumes Dataset:** `s3://minio:9000/fraud-data-processed/marts/`
+- **Produces Dataset:** `postgresql://actualdata-postgres:5432/actualdata/public/fraud_alerts`
 - **Logic:**
-  - Runs the scoring script.
-  - **Triggers:** `alert_users_dag` after scoring is complete.
+  - Runs the scoring script on transformed data
+  - Saves fraud alerts to PostgreSQL
+- **Triggers:** `alert_users_dag` via dataset production
 
 ---
 
 ### 5. `alert_users_dag`
-- **Purpose:** Alerts customers identified in fraud alerts and initiates visualization.
+- **Purpose:** Alerts customers identified in fraud alerts and optionally initializes Metabase.
+- **Consumes Dataset:** `postgresql://actualdata-postgres:5432/actualdata/public/fraud_alerts`
 - **Logic:**
-  - Connects to the database, fetches customers with fraud alerts, and simulates sending notifications.
-  - **Triggers:** `visualize_alert_data_dag` to generate updated visualizations.
-
-## ⏳ Orchestration Logic
-
-- **Downstream Triggers:** Each DAG (except the last) triggers the next DAG using Airflow’s `TriggerDagRunOperator`.
-- **Resource Management:** The first DAG waits for all other DAGs to finish before starting, ensuring no resource contention.
-- **Manual & Scheduled Runs:** The initial data generation DAG can be scheduled (e.g., every minute), while others are typically triggered downstream.
+  - Connects to PostgreSQL, fetches customers with fraud alerts
+  - Simulates sending notifications via print statements
+  - Uses branching logic to conditionally trigger Metabase initialization
+- **Conditionally Triggers:** `initialize_metabase_dag` via `TriggerDagRunOperator` (if enabled via Variables)
 
 ---
 
-## 🎯 Purpose
-
-This modular DAG structure:
-- Promotes separation of concerns and maintainability.
-- Allows for easy debugging and monitoring of each pipeline stage.
-- Enables flexible scaling and future extension of the pipeline.
+### 6. `initialize_metabase_dag`
+- **Purpose:** Sets up Metabase dashboards and database connections for fraud detection visualization.
+- **Schedule:** Trigger by alert_users_dag dag
+- **Logic:**
+  - Runs the `initialize_metabase.py` script
+  - Creates admin user, database connections, and imports dashboards/cards
+  - Sets up fraud detection visualizations and analytics
 
 ---
 
+## 📊 Dataset-Based Triggering Mechanism
 
-## 📝 Notes
+The fraud detection pipeline uses **Airflow Datasets** to create automatic dependencies between DAGs. This approach provides several advantages:
 
-- All DAGs are designed to run in a Dockerized Airflow environment.
-- Environment variables and script paths are configurable for flexibility.
-- Each DAG is documented in its own file for further details.
+### How It Works
+- **Producers:** DAGs that generate or modify data declare `outlets` on their tasks
+- **Consumers:** DAGs that depend on data declare `schedule=[dataset]` to automatically trigger when datasets are updated
+- **Automatic Triggering:** When a task with dataset outlets completes successfully, all DAGs scheduled on those datasets are triggered

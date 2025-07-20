@@ -1,21 +1,20 @@
-# 🛡️ Fraud Detection Model Development – Rule-Based Labeling + Supervised ML
+# 🎯 ML Fraud Detection Model
 
-This project demonstrates how to build a production-inspired fraud detection model by combining rule-based labeling with supervised machine learning. It walks through the full data science pipeline: from behavioral feature engineering, to label creation, to model training, evaluation, and export.
+End-to-end machine learning pipeline for fraud detection: feature engineering, labeling, training, and evaluation.
 
 ---
 
-## 🧭 Project Objectives
+## Objectives
 
 - Enrich transaction data with behavioral infered data.
-- Design arule-based fraud scoring system.
-- Generate supervised fraud labels using risk scores.
+- Design a rule-based scoring system.
 - Train a machine learning model to detect fraud using enriched features.
 - Evaluate model performance.
-- Save the model for integration into pipeline.
+- Save the model for integration.
 
 ---
 
-## 📂 Contents
+## 📂 Notebook Contents
 
 | Section | Description |
 |--------|-------------|
@@ -45,32 +44,19 @@ We joined each transaction with prior login events (same customer, before transa
 We had no real fraud labels. Instead of labeling fraud randomly, we built a scoring system based on domain logic.
 
 ### 📐 Logic:
-Each transaction is scored based on features like:
-- Failed logins
-- Geo mismatch
-- Risky merchants
-- Fraud history
-- Time-based login anomalies
-- Z-score outliers in amount
+Each transaction is scored based on selected features mentioned above. 
 
 Each rule contributes a weight (score). If a transaction's total score exceeds a defined threshold (`RISK_THRESHOLD = 5`), it's labeled as fraud (`label = 1`).
 
 ### ✅ Output:
 - `label`: Final target column used for model training
 - `risk_score`: Transparent risk score
-- `flags`: List of triggered fraud rules
 
 ---
 
 ## 🧹 Data Preparation
 
-### 🔢 Feature Set:
-Selected meaningful features:
-- Behavioral: `failed_logins_24h`, `night_login`, etc.
-- Profile: `customer_has_fraud_history`, `customer_past_fraud_count`
-- Context: `geo_mismatch`, `is_high_risk_merchant`, `transaction_amount`
-
-### 🔄 Encoding:
+### 🔄 Encoding For Categorical Feature.
 Encoded `customer_risk_level` with ordinal values:
 - `Low` → 0
 - `Medium` → 1

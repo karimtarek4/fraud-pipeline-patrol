@@ -9,17 +9,14 @@ This project uses GitHub Actions for Continuous Integration (CI) with comprehens
 ### 1. CI Workflow (`.github/workflows/ci.yml`)
 
 Triggered on:
-- Push to `main`, `develop`, or `feat/*` branches
-- Pull requests to `main` or `develop`
+- Push to `main` or `feat/*` branches
+- Pull requests to `main` 
 - Manual dispatch
 
 **Jobs:**
 
 #### Test Suite
 - Runs all Python tests using the custom test runner
-- Sets up PostgreSQL service for database tests
-- Creates test data directories
-- Uploads test results as artifacts
 
 #### Airflow DAG Validation
 - Validates all Airflow DAG syntax
@@ -29,7 +26,7 @@ Triggered on:
 #### dbt Model Validation
 - Validates dbt project configuration
 - Runs `dbt debug`, `dbt parse`, and `dbt compile`
-- Ensures all models are syntactically correct
+- Ensures data quality for all 
 
 #### Code Quality Checks
 - **Black**: Code formatting
@@ -65,75 +62,9 @@ Tool configurations for:
 - pytest test runner
 - mypy type checker
 
-### `.flake8`
-Flake8 linting configuration with Black compatibility.
-
-### `.github/dependabot.yml`
-Automated dependency updates for:
-- Python packages
-- Docker images
-- GitHub Actions
-
-## Local Development
-
-### Install Pre-commit Hooks
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-### Run Code Quality Checks
-```bash
-# Format code
-black .
-isort .
-
-# Lint code
-flake8 .
-mypy .
-
-# Security scan
-bandit -r .
-safety check
-```
-
-### Run Tests
-```bash
-# Run all tests
-python run_all_tests.py --verbose
-
-# Run specific test
-PYTHONPATH=. pytest tests/test_specific.py -v
-```
-
-## CI Status Badges
-
-Add these to your main README.md:
-
-```markdown
-[![CI](https://github.com/karimtarek4/fraud-pipeline-patrol/actions/workflows/ci.yml/badge.svg)](https://github.com/karimtarek4/fraud-pipeline-patrol/actions/workflows/ci.yml)
-[![Pre-commit](https://github.com/karimtarek4/fraud-pipeline-patrol/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/karimtarek4/fraud-pipeline-patrol/actions/workflows/pre-commit.yml)
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Test failures**: Check test logs in GitHub Actions artifacts
-2. **DAG validation errors**: Ensure all Airflow dependencies are installed
-3. **dbt compilation errors**: Verify dbt project configuration
-4. **Code quality failures**: Run pre-commit hooks locally before pushing
-
 ### Environment Variables
 
 The CI pipeline uses these environment variables:
 - `PYTHONPATH`: Set to workspace root
 - `POSTGRES_*`: Database connection details for tests
 - `AIRFLOW_HOME`: Airflow configuration directory
-
-### Debugging CI
-
-1. Check the Actions tab in your GitHub repository
-2. Review job logs for specific error messages
-3. Download artifacts for detailed test results
-4. Run commands locally to reproduce issues

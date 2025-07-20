@@ -12,16 +12,6 @@ This directory contains all tests for the Fraud Pipeline Patrol project. The tes
 | `test_dag_parsing_and_validation.py` | DAG | 25 | Tests Airflow DAG parsing and validation |
 | `test_dag_structure_and_datasets.py` | DAG | 6 | Tests DAG structure and dataset configurations |
 
-## 🏗️ Test Architecture
-
-The test suite follows these principles:
-
-1. **Isolation**: Each test is independent and doesn't affect others
-2. **Mocking**: External dependencies (databases, file systems) are mocked
-3. **Comprehensive Coverage**: Tests cover happy paths, edge cases, and error conditions
-4. **Environment Safety**: Tests use fixtures to manage environment variables safely
-5. **Clear Assertions**: Each test has clear, specific assertions about expected behavior
-
 ## 🧪 Test Categories
 
 ### Unit Tests

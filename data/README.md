@@ -1,6 +1,6 @@
 # 📁 `data/` Directory
 
-The `data/` directory is the **source of truth** for all raw and processed data used in the fraud detection pipeline. It contains:
+The `data/` directory is the **source of truth** for all raw and processed data used in early stages of fraud detection pipeline. It contains:
 
 ---
 
@@ -11,47 +11,28 @@ A Python script that **generates a rich synthetic dataset** for the project. Whe
 * Creates **customer profiles** with SCD2 fields and behavioral baselines.
 * Builds a **merchant table** with risk scores per category.
 * Produces **transaction records** that include:
+* Writes out **Parquet** files (with CSV fallback) under 
 
-  * Realistic timing (exponential inter-arrival + bursts)
-  * Rule-based features (amount around baseline, device/IP consistency, geolocation drift)
-  * Metadata (`batch_id`, `ingestion_date`) for incremental loads
-* Extracts **login attempts** into a separate table for modeling authentication events.
-* Writes out **Parquet** files (with CSV fallback) under `data/raw/`:
+## 2. `data/raw/`:
 
-  * `customers.parquet` (or `.csv`)
-  * `merchants.parquet` (or `.csv`)
-  * `transactions.parquet` (or `.csv`)
-  * `login_attempts.parquet` (or `.csv`)
-
-**Usage:**
-
-```bash
-pip install pandas numpy pyarrow
-python data/generate_synthetic_fraud_data.py
-```
+  * `customers.parquet` 
+  * `merchants.parquet` 
+  * `transactions.parquet` 
+  * `login_attempts.parquet` 
 
 ---
 
-## 2. `data/raw/`
+## 3. `data/processed/` 
 
-After running the script, this folder will contain your **raw data** artifacts:
+Contains **partitioned data** from `data/raw/` that has been processed and partitioned by **DuckDB** via the `partition_data_with_duckdb.py` script. This directory maintains the same data structure but with improved organization:
 
-* **Customer** table: foundational dimension for modeling (with SCD2 candidates).
-* **Merchant** table: lookup dimension enriched with risk scores.
-* **Transaction** facts: base events for ingestion and dbt staging.
-* **Login Attempts** facts: separate authentication event logs.
+* `customers/` - Partitioned customer data from `customers.parquet`
+* `merchants/` - Partitioned merchant data from `merchants.parquet` 
+* `transactions/` - Partitioned transaction data from `transactions.parquet`
+* `login_attempts/` - Partitioned login attempt data from `login_attempts.parquet`
 
-Your **Airflow ingestion DAG** and **dbt sources** will point to these files as the starting point of the pipeline.
-
----
-
-## 3. `data/processed/` (optional)
-
-Once you begin staging and transforming data (e.g., via Airflow or dbt), use this folder to store **intermediate outputs**:
-
-* Cleaned and enriched tables ready for analytics models.
-* Partitioned Parquet by date if desired.
+The partitioning improves query performance and data organization.
 
 ---
 
-This structure ensures a clear separation between raw inputs and transformed outputs, facilitating incremental loads, reproducibility, and robust testing throughout your pipeline.
+This folder holds the data before upload to bucket.
