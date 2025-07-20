@@ -4,7 +4,7 @@
     format='parquet'
 ) }}
 
-SELECT 
+SELECT
     -- Combine using surrogate key
     l.login_attempt_id,
 
@@ -30,7 +30,7 @@ SELECT
     l.failed_login_attempts,
     l.weekend_login_attempts,
     l.night_login_attempts
-FROM 
+FROM
     {{ ref('fact_login_attempt') }} l
     LEFT JOIN {{ ref('dim_customer') }} AS c
         ON l.customer_id = c.customer_id

@@ -1,6 +1,6 @@
 # 🚦 Airflow DAGs Orchestration
 
-Welcome to the orchestration layer of the Fraud Pipeline Patrol project!  
+Welcome to the orchestration layer of the Fraud Pipeline Patrol project!
 This directory contains all the Apache Airflow DAGs that automate and coordinate the end-to-end data pipeline for synthetic fraud detection.
 
 ---
@@ -34,7 +34,7 @@ The pipeline is composed of several modular DAGs, each responsible for a specifi
 
 ### 1. `generate_and_partition_data_dag`
 - **Purpose:** Generates synthetic fraud data and partitions it for efficient processing.
-- **Logic:**  
+- **Logic:**
   - Waits for all other DAGs to finish before starting (to avoid resource conflicts).
   - Runs scripts to generate and partition data.
   - **Triggers:** `upload_to_minio_dag` upon completion.
@@ -43,7 +43,7 @@ The pipeline is composed of several modular DAGs, each responsible for a specifi
 
 ### 2. `upload_to_minio_dag`
 - **Purpose:** Uploads partitioned data to MinIO, maintaining directory structure.
-- **Logic:**  
+- **Logic:**
   - Executes a script to upload all processed data.
   - **Triggers:** `run_dbt_dag` after upload is complete.
 
@@ -51,7 +51,7 @@ The pipeline is composed of several modular DAGs, each responsible for a specifi
 
 ### 3. `run_dbt_dag`
 - **Purpose:** Runs DBT models to transform and prepare data for scoring.
-- **Logic:**  
+- **Logic:**
   - Installs DBT dependencies.
   - Executes DBT transformations.
   - **Triggers:** `ml_transaction_scoring_dag` after DBT run.
@@ -60,7 +60,7 @@ The pipeline is composed of several modular DAGs, each responsible for a specifi
 
 ### 4. `ml_transaction_scoring_dag`
 - **Purpose:** Scores transactions using the latest models and logic.
-- **Logic:**  
+- **Logic:**
   - Runs the scoring script.
   - **Triggers:** `alert_users_dag` after scoring is complete.
 
@@ -68,7 +68,7 @@ The pipeline is composed of several modular DAGs, each responsible for a specifi
 
 ### 5. `alert_users_dag`
 - **Purpose:** Alerts customers identified in fraud alerts and initiates visualization.
-- **Logic:**  
+- **Logic:**
   - Connects to the database, fetches customers with fraud alerts, and simulates sending notifications.
   - **Triggers:** `visualize_alert_data_dag` to generate updated visualizations.
 

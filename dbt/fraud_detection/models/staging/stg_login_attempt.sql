@@ -6,7 +6,7 @@ cleaned AS (
     SELECT
         -- Primary keys and IDs
         CustomerID AS customer_id,
-        
+
         -- Dates and timestamps
         LoginTimestamp AS login_timestamp,
 
@@ -17,10 +17,10 @@ cleaned AS (
     FROM source
 )
 
-SELECT 
+SELECT
     customer_id,
     login_timestamp,
     is_success,
     ingestion_date
-FROM 
+FROM
     cleaned

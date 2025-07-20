@@ -13,13 +13,13 @@ models:
           - not_null
           - dbt_expectations.expect_column_values_to_be_of_type:
               column_type: bigint
-      
+
       - name: AccountCreationDate
         description: "Date when the customer account was created"
         tests:
           - not_null
 
-              
+
       - name: Age
         description: "Customer age in years"
         tests:
@@ -28,8 +28,8 @@ models:
               min_value: 18
               max_value: 100
               strictly: false
-  
-              
+
+
       - name: PastFraudCount
         description: "Number of past fraudulent activities associated with this customer"
         tests:
@@ -37,17 +37,17 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: 0
               strictly: false
-              
+
       - name: HomeDevice
         description: "Primary device type used by the customer"
         tests:
           - not_null
-              
+
       - name: HomeIP
         description: "Primary IP address used by the customer"
         tests:
           - not_null
-          
+
       - name: HomeLat
         description: "Latitude of customer's primary location"
         tests:
@@ -55,7 +55,7 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: -90
               max_value: 90
-      
+
       - name: HomeLon
         description: "Longitude of customer's primary location"
         tests:

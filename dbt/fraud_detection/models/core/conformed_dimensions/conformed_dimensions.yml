@@ -63,4 +63,4 @@ models:
       - name: is_high_risk_merchant
         description: "Boolean flag indicating if the merchant is considered high risk (score >= 0.7)"
       - name: merchant_risk_category
-        description: "Risk category based on the merchant risk score (Low Risk, Medium Risk, High Risk)"  
+        description: "Risk category based on the merchant risk score (Low Risk, Medium Risk, High Risk)"

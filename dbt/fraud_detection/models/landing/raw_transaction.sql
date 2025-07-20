@@ -1,5 +1,5 @@
 WITH base AS (
-    SELECT 
+    SELECT
         TransactionID,
         CustomerID,
         Timestamp,

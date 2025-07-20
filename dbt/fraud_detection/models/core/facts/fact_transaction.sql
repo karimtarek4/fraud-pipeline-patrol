@@ -1,7 +1,7 @@
 /*
   Enriched transactions model that extends the core fact table with dimension attributes
   and adds fraud detection metrics and indicators.
-  
+
   This is where we add all the analytical features derived from dimension tables.
 */
 
@@ -38,7 +38,7 @@ enriched_transactions AS (
         ft.transaction_id,
         ft.customer_id,
         ft.merchant_id,
-        
+
         -- Transaction details from fact table
         ft.transaction_timestamp,
         ft.transaction_amount,
@@ -49,25 +49,25 @@ enriched_transactions AS (
         ft.longitude,
         ft.transaction_time_of_day,
         ft.is_high_value_transaction,
-       
-        
+
+
         -- Calculate additional fraud risk indicators
         CASE
             WHEN c.risk_level = 'High' AND ft.is_high_value_transaction THEN TRUE
             WHEN c.has_fraud_history AND ft.transaction_amount > 500 THEN TRUE
             ELSE FALSE
         END AS has_elevated_fraud_risk,
-        
+
         -- Distance calculation between transaction and customer home location
-        CASE 
-            WHEN c.home_latitude IS NOT NULL AND c.home_longitude IS NOT NULL AND 
+        CASE
+            WHEN c.home_latitude IS NOT NULL AND c.home_longitude IS NOT NULL AND
                  ft.latitude IS NOT NULL AND ft.longitude IS NOT NULL
             THEN SQRT(POW(c.home_latitude - ft.latitude, 2) + POW(c.home_longitude - ft.longitude, 2))
             ELSE NULL
         END AS distance_from_home
-    FROM 
+    FROM
         stg_transaction ft
-    LEFT JOIN 
+    LEFT JOIN
         dim_customers c ON ft.customer_id = c.customer_id
 )
 
@@ -76,7 +76,7 @@ SELECT
     transaction_id,
     customer_id,
     merchant_id,
-    
+
     -- Transaction details from fact table
     transaction_timestamp,
     transaction_amount,
@@ -93,6 +93,6 @@ SELECT
 
     -- Distance calculation between transaction and customer home location
     distance_from_home
-    
-FROM 
+
+FROM
     enriched_transactions

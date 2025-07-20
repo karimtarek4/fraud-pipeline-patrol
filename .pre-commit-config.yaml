@@ -1,0 +1,53 @@
+repos:
+  # Basic file and format checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace    # Removes spaces at end of lines: "hello world   " → "hello world"
+      - id: end-of-file-fixer      # Ensures files end with newline character
+      - id: check-yaml             # Validates YAML syntax: catches "key: [value" (missing ])
+      - id: check-added-large-files # Prevents committing files >500KB (like datasets)
+      - id: check-case-conflict    # Finds "File.py" vs "file.py" issuess
+      - id: check-merge-conflict   # Finds leftover "<<<<<<< HEAD" markers
+      - id: debug-statements       # Finds forgotten "print()" or "pdb.set_trace()"
+      - id: check-json             # Validates JSON syntax: catches missing commas, quotes
+
+  # Python code formatter - CHANGES files to look consistent
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3
+        # Example: "def func(x,y):return x+y" → "def func(x, y):\n    return x + y"
+
+  # Import statement organizer - CHANGES files to sort imports
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]  # Compatible with black formatting
+        # Example: Sorts "import pandas\nimport numpy" → "import numpy\nimport pandas"
+
+  # Python style checker - REPORTS issues but doesn't change files
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-docstrings]
+        # Example: Reports "E302 expected 2 blank lines, found 1" or "undefined variable"
+
+  # Security vulnerability scanner - REPORTS security issues
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        additional_dependencies: ["bandit[toml]"]
+        # Example: Reports "hardcoded password" or "use of eval() is dangerous"
+
+  # Type checker - REPORTS type-related errors
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.8.0
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-requests]
+  #       # Example: Reports "expected int, got str" when types don't match

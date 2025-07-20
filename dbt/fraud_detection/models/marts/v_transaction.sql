@@ -12,20 +12,20 @@ with final as (
         -- and dim_merchant using dbtstar
         {{ dbt_utils.star(from=ref('dim_customer'), relation_alias='c', except=["customer_id"]) }},
         {{ dbt_utils.star(from=ref('dim_merchant'), relation_alias='m', except=["merchant_id"]) }}
-    FROM 
-        {{ ref('fact_transaction') }} ft 
-    LEFT JOIN 
+    FROM
+        {{ ref('fact_transaction') }} ft
+    LEFT JOIN
         {{ ref('dim_customer') }} c ON ft.customer_id = c.customer_id
-    LEFT JOIN 
+    LEFT JOIN
         {{ ref('dim_merchant') }} m ON ft.merchant_id = m.merchant_id
 
 )
-SELECT 
+SELECT
     -- Keys
     transaction_id,
     customer_id,
     merchant_id,
-    
+
     -- Transaction details from fact table
     transaction_timestamp,
     transaction_amount,
@@ -58,5 +58,5 @@ SELECT
     merchant_risk_category as merchant_risk_category,
     is_high_risk_merchant as is_high_risk_merchant
 
-FROM 
+FROM
     final

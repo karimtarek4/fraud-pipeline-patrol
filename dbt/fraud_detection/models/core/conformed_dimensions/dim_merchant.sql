@@ -14,12 +14,12 @@ infer_columns AS (
         -- flags
         (merchant_risk_score >= 0.7) AS is_high_risk_merchant,
         -- Derived risk classification
-        CASE 
+        CASE
             WHEN merchant_risk_score >= 0.5 THEN 'High Risk'
             WHEN merchant_risk_score >= 0.2 THEN 'Medium Risk'
             ELSE 'Low Risk'
         END AS merchant_risk_category
-        
+
     FROM stg_merchant
 )
 
@@ -34,5 +34,5 @@ SELECT
     is_high_risk_merchant,
     -- Derived risk classification
     merchant_risk_category
-FROM 
+FROM
     infer_columns

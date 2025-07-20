@@ -24,7 +24,7 @@ add_columns AS (
             WHEN date_part('hour', login_timestamp) >= 12 AND date_part('hour', login_timestamp) < 18 THEN 'Afternoon (12PM-6PM)'
             ELSE 'Evening (6PM-12AM)'
         END AS login_time_of_day,
-        
+
         CASE
             WHEN date_part('dow', login_timestamp) IN (0, 6) THEN TRUE  -- 0=Sunday, 6=Saturday
             ELSE FALSE
@@ -47,10 +47,10 @@ customer_login_metrics AS (
 SELECT
     -- Combine using surrogate key
     {{ dbt_utils.generate_surrogate_key(['l.customer_id', 'l.login_timestamp']) }} AS login_attempt_id,
-    
+
     -- Foreign keys
     l.customer_id,
-    
+
     -- Login details
     l.login_timestamp,
     l.is_success,
@@ -60,14 +60,14 @@ SELECT
     l.login_hour,
     l.login_time_of_day,
     l.is_weekend_login,
-    
+
     -- Login pattern metrics
     clm.total_login_attempts,
     clm.failed_login_attempts,
     clm.weekend_login_attempts,
     clm.night_login_attempts
 
-FROM 
+FROM
     add_columns l
 LEFT JOIN
     customer_login_metrics clm

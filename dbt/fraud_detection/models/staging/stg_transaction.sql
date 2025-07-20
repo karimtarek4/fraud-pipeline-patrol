@@ -8,13 +8,13 @@ cleaned AS (
         TransactionID AS transaction_id,
         CustomerID AS customer_id,
         MerchantID AS merchant_id,
-        
+
         -- Dates and timestamps
         Timestamp AS transaction_timestamp,
-        
+
         -- Numeric fields
         NULLIF(TransactionAmount, 0) AS transaction_amount,
-        
+
         -- Text fields with cleaning
         TRIM(COALESCE(DeviceID, 'Unknown')) AS device_id,
         TRIM(COALESCE(IP_Address, 'Unknown')) AS ip_address,
@@ -23,24 +23,24 @@ cleaned AS (
         -- Geographic coordinates
         Lat AS latitude,
         Lon AS longitude,
-        
+
         -- System fields
         ingestion_date
-        
 
-        
+
+
     FROM source
 ),
 
 final AS (
     SELECT
         *
-    FROM 
+    FROM
         cleaned
 )
 
 -- Final output with cleaned data and fraud detection indicators
-SELECT 
+SELECT
     transaction_id,
     customer_id,
     merchant_id,
@@ -53,5 +53,5 @@ SELECT
     longitude,
     ingestion_date
 
-FROM 
+FROM
     final

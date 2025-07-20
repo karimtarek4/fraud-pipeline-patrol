@@ -28,7 +28,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 # Model configurations follow our project structure:
 # - landing: Raw source data (landing zone)
-# - staging: Cleaned and standardized data 
+# - staging: Cleaned and standardized data
 # - marts: Final dimensional models and aggregates
 models:
   fraud_detection:
@@ -37,19 +37,19 @@ models:
       +materialized: view
       +schema: landing
       +tags: ["raw", "source"]
-    
+
     # Staging/cleaned data (transformed but still granular)
     staging:
       +materialized: table
       +schema: staging
       +tags: ["staging", "cleaned"]
-    
+
     # Dimensional warehouse models (final presentation layer)
     marts:
       +materialized: view
       +schema: dwh
       +tags: ["dwh", "mart"]
-    
+
     # Dimensional warehouse models (final presentation layer)
     core:
       conformed_dimensions:
