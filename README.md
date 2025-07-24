@@ -54,7 +54,7 @@ fraud-pipeline-patrol/
 - 6 interconnected DAGs triggered via Airflow Datasets
 - Automated workflow: Data Generation → MinIO Upload → dbt Transform → ML Scoring → Alerts → Dashboards
 
-![Dag_Progression](assets/high-dag-progression-design.png)
+![Dag_Progression](assets/dag-progression.png)
 
 ### 3. **🏗️ Data Modeling** ([`dbt/`](dbt/README.md))
 - Kimball dimensional modeling: Raw → Landing → Staging → Marts
