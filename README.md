@@ -26,7 +26,7 @@ This project simulates a real-world financial fraud detection system, showcasing
 
 ```
 fraud-pipeline-patrol/
-├── 📊 data/              # Raw synthetic data & partitioned outputs  
+├── 📊 data/              # Raw synthetic data & partitioned outputs
 ├── 🚦 airflow/           # Pipeline orchestration (6 DAGs, dataset-driven)
 ├── 🏗️ dbt/              # Dimensional models (Kimball methodology)
 ├── 🎯 scoring/           # ML fraud detection (rules + Random Forest)
@@ -40,9 +40,9 @@ fraud-pipeline-patrol/
 ---
 
 
-## 🧭 Architecture Diagram
+## 🧭 High-Level Diagram
 
-![Architecture](assets/architecture_diagram.png)
+![Architecture](assets/high-level-design.png)
 
 ## 🔄 How It Works
 
@@ -54,9 +54,14 @@ fraud-pipeline-patrol/
 - 6 interconnected DAGs triggered via Airflow Datasets
 - Automated workflow: Data Generation → MinIO Upload → dbt Transform → ML Scoring → Alerts → Dashboards
 
+![Dag_Progression](assets/high-dag-progression-design.png)
+
 ### 3. **🏗️ Data Modeling** ([`dbt/`](dbt/README.md))
 - Kimball dimensional modeling: Raw → Landing → Staging → Marts
 - Star schema with enriched fact tables ready for analytics and ML
+
+![Transformation_Transactions](assets/dbt_transaction.png)
+![Transformation_Logins](assets/dbt_logins.png)
 
 ### 4. **🎯 Fraud Detection** ([`scoring/`](scoring/README.md))
 - **Rule-based scoring:** Failed logins, geo-mismatches, night patterns, high-risk flags
@@ -66,6 +71,8 @@ fraud-pipeline-patrol/
 ### 5. **📈 Visualization** ([`metabase/`](metabase/README.md))
 - Automated Metabase setup: admin creation, database connections, dashboard imports
 - Real-time fraud monitoring: risk distributions, top alerts, customer patterns
+
+![Dashboard](assets/fraud-summary-dashboard.png)
 
 ### 6. **✅ Quality Assurance** ([`tests/`](tests/README.md))
 - 44+ comprehensive tests: unit, integration, DAG validation

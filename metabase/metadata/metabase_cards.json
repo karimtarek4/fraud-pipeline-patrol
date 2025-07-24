@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Top 10 Risky Customers (by Total Risk Score)",
+    "description": null,
+    "database_id": 2,
+    "collection_id": null,
+    "query_type": "native",
+    "type": "question",
+    "display": "row",
+    "dataset_query": {
+      "database": 2,
+      "type": "native",
+      "native": {
+        "template-tags": {},
+        "query": "SELECT customer_id, SUM(risk_score) AS total_risk_score\nFROM public.fraud_alerts\nGROUP BY customer_id\nORDER BY total_risk_score DESC\nLIMIT 10;"
+      }
+    },
+    "visualization_settings": {
+      "table.pivot_column": "total_risk_score",
+      "table.cell_column": "customer_id",
+      "graph.show_values": true,
+      "graph.x_axis.title_text": "Customer Id ",
+      "graph.y_axis.title_text": "Risk Score ",
+      "graph.dimensions": ["customer_id"],
+      "graph.metrics": ["total_risk_score"]
+    },
+    "result_metadata": [
+      {
+        "database_type": "varchar",
+        "semantic_type": null,
+        "name": "customer_id",
+        "field_ref": ["field", "customer_id", {"base-type": "type/Text"}],
+        "effective_type": "type/Text",
+        "ident": "native[4xJXfAbc340B2XMiMH1Nj]__customer_id",
+        "display_name": "customer_id",
+        "fingerprint": {
+          "global": {"distinct-count": 10, "nil%": 0.0},
+          "type": {"type/Text": {"percent-json": 0.0, "percent-url": 0.0, "percent-email": 0.0, "percent-state": 0.0, "average-length": 4.0}}
+        },
+        "base_type": "type/Text"
+      },
+      {
+        "database_type": "int8",
+        "semantic_type": "type/Score",
+        "name": "total_risk_score",
+        "field_ref": ["field", "total_risk_score", {"base-type": "type/BigInteger"}],
+        "effective_type": "type/BigInteger",
+        "ident": "native[4xJXfAbc340B2XMiMH1Nj]__total_risk_score",
+        "display_name": "total_risk_score",
+        "fingerprint": {
+          "global": {"distinct-count": 7, "nil%": 0.0},
+          "type": {"type/Number": {"min": 190.0, "q1": 190.7639320225002, "q3": 224.0, "max": 236.0, "sd": 18.72490913788962, "avg": 205.8}}
+        },
+        "base_type": "type/BigInteger"
+      }
+    ]
+  }
+]
